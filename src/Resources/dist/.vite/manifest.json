@@ -1,0 +1,117 @@
+{
+  "_inertia-vue3-BpWI2eLp.js": {
+    "file": "assets/inertia-vue3-BpWI2eLp.js",
+    "name": "inertia-vue3",
+    "imports": [
+      "_vue-MlUFOzFR.js"
+    ]
+  },
+  "_pinia-Cs44aIR9.js": {
+    "file": "assets/pinia-Cs44aIR9.js",
+    "name": "pinia",
+    "imports": [
+      "_vue-MlUFOzFR.js"
+    ]
+  },
+  "_shared-CVAbX-_t.js": {
+    "file": "assets/shared-CVAbX-_t.js",
+    "name": "shared",
+    "imports": [
+      "_vue-MlUFOzFR.js",
+      "_pinia-Cs44aIR9.js",
+      "_vue-i18n-twHPJBzy.js",
+      "_inertia-vue3-BpWI2eLp.js"
+    ]
+  },
+  "_vue-MlUFOzFR.js": {
+    "file": "assets/vue-MlUFOzFR.js",
+    "name": "vue"
+  },
+  "_vue-i18n-twHPJBzy.js": {
+    "file": "assets/vue-i18n-twHPJBzy.js",
+    "name": "vue-i18n",
+    "imports": [
+      "_vue-MlUFOzFR.js"
+    ]
+  },
+  "src/Resources/js/runtime/blade.js": {
+    "file": "assets/runtime-blade-e-vnSrpK.js",
+    "name": "runtime-blade",
+    "src": "src/Resources/js/runtime/blade.js",
+    "isEntry": true,
+    "imports": [
+      "_vue-MlUFOzFR.js",
+      "_shared-CVAbX-_t.js",
+      "src/Resources/js/runtime/index.js",
+      "_pinia-Cs44aIR9.js",
+      "_vue-i18n-twHPJBzy.js",
+      "_inertia-vue3-BpWI2eLp.js"
+    ]
+  },
+  "src/Resources/js/runtime/index.js": {
+    "file": "assets/runtime-C02xcEpk.js",
+    "name": "runtime",
+    "src": "src/Resources/js/runtime/index.js",
+    "isEntry": true
+  },
+  "src/Resources/js/runtime/inertia.js": {
+    "file": "assets/runtime-inertia-B5nsBs55.js",
+    "name": "runtime-inertia",
+    "src": "src/Resources/js/runtime/inertia.js",
+    "isEntry": true,
+    "imports": [
+      "_vue-MlUFOzFR.js",
+      "_inertia-vue3-BpWI2eLp.js",
+      "src/Resources/js/vendor/ziggy.js",
+      "_shared-CVAbX-_t.js",
+      "src/Resources/js/runtime/index.js",
+      "_pinia-Cs44aIR9.js",
+      "_vue-i18n-twHPJBzy.js"
+    ]
+  },
+  "src/Resources/js/vendor/inertia-vue3.js": {
+    "file": "assets/vendor-inertia-CgBX0iw_.js",
+    "name": "vendor-inertia",
+    "src": "src/Resources/js/vendor/inertia-vue3.js",
+    "isEntry": true,
+    "imports": [
+      "_inertia-vue3-BpWI2eLp.js",
+      "_vue-MlUFOzFR.js"
+    ]
+  },
+  "src/Resources/js/vendor/pinia.js": {
+    "file": "assets/vendor-pinia-CDL6Z7wn.js",
+    "name": "vendor-pinia",
+    "src": "src/Resources/js/vendor/pinia.js",
+    "isEntry": true,
+    "imports": [
+      "_pinia-Cs44aIR9.js",
+      "_vue-MlUFOzFR.js"
+    ]
+  },
+  "src/Resources/js/vendor/vue-i18n.js": {
+    "file": "assets/vendor-vue-i18n-BoIJPn-6.js",
+    "name": "vendor-vue-i18n",
+    "src": "src/Resources/js/vendor/vue-i18n.js",
+    "isEntry": true,
+    "imports": [
+      "_vue-i18n-twHPJBzy.js",
+      "_vue-MlUFOzFR.js"
+    ]
+  },
+  "src/Resources/js/vendor/vue.js": {
+    "file": "assets/vendor-vue-DE9T8BvL.js",
+    "name": "vendor-vue",
+    "src": "src/Resources/js/vendor/vue.js",
+    "isEntry": true,
+    "imports": [
+      "_vue-MlUFOzFR.js"
+    ]
+  },
+  "src/Resources/js/vendor/ziggy.js": {
+    "file": "assets/vendor-ziggy-kP-p7Qcw.js",
+    "name": "vendor-ziggy",
+    "src": "src/Resources/js/vendor/ziggy.js",
+    "isEntry": true
+  }
+}
