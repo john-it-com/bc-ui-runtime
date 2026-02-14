@@ -4,7 +4,8 @@
  * ModuleDefinition value object.
  *
  * Purpose: Collect module metadata and entries for a bc package.
- * Role: Acts as the registry record consumed when building import maps and module lists.
+ * Role: Acts as the registry record consumed when building import maps and module lists,
+ *       supporting multiple entries per runtime context.
  */
 
 namespace JohnIt\Bc\Runtime\Runtime;
@@ -12,7 +13,7 @@ namespace JohnIt\Bc\Runtime\Runtime;
 class ModuleDefinition
 {
     /**
-     * @var array<string, ModuleEntry>
+     * @var array<string, ModuleEntry[]>
      */
     private array $entries = [];
 
@@ -29,22 +30,27 @@ class ModuleDefinition
     }
 
     /**
-     * Add or replace a module entry for a runtime context.
+     * Add a module entry for a runtime context.
      *
-     * Why: Modules can register multiple entrypoints (admin/shop) without overwriting each other.
+     * Why: Modules can register multiple entrypoints (admin/shop) without overwriting each other,
+     *      and the registry preserves registration order.
      *
      * @param ModuleEntry $entry
      * @return void
      */
     public function addEntry(ModuleEntry $entry): void
     {
-        $this->entries[$entry->context] = $entry;
+        if (!array_key_exists($entry->context, $this->entries)) {
+            $this->entries[$entry->context] = [];
+        }
+
+        $this->entries[$entry->context][] = $entry;
     }
 
     /**
      * Return all registered entries for this module.
      *
-     * @return array<string, ModuleEntry>
+     * @return array<string, ModuleEntry[]>
      */
     public function entries(): array
     {
@@ -52,13 +58,13 @@ class ModuleDefinition
     }
 
     /**
-     * Fetch a module entry by context name.
+     * Fetch all module entries for a context name.
      *
      * @param string $context
-     * @return ModuleEntry|null
+     * @return ModuleEntry[]
      */
-    public function entryForContext(string $context): ?ModuleEntry
+    public function entriesForContext(string $context): array
     {
-        return $this->entries[$context] ?? null;
+        return $this->entries[$context] ?? [];
     }
 }

@@ -5,6 +5,7 @@
  *
  * Purpose: Resolve entry files and CSS assets from Vite manifest files in public builds.
  * Role: Allows bc-ui-runtime to build import maps and style links from published module assets.
+ * Notes: Supports both Vite's default ".vite/manifest.json" and a root-level manifest.json.
  */
 
 namespace JohnIt\Bc\Runtime\Runtime\Manifest;
@@ -28,7 +29,7 @@ class ViteManifestRepository
     /**
      * Fetch the manifest array for a module public base path.
      *
-     * Why: Each module publishes its own Vite manifest to public/vendor/.../manifest.json.
+     * Why: Modules may publish either a root-level manifest.json or Vite's default ".vite/manifest.json".
      *
      * @param string $publicBasePath
      * @return array<string, mixed>
@@ -41,9 +42,10 @@ class ViteManifestRepository
             return $this->cache[$normalizedBasePath];
         }
 
-        $manifestPath = public_path(trim($normalizedBasePath, '/').'/manifest.json');
+        $base = trim($normalizedBasePath, '/');
+        $manifestPath = $this->resolveManifestPath($base);
 
-        if (!$this->files->exists($manifestPath)) {
+        if ($manifestPath === null) {
             $this->cache[$normalizedBasePath] = [];
             return [];
         }
@@ -54,6 +56,27 @@ class ViteManifestRepository
         $this->cache[$normalizedBasePath] = is_array($decoded) ? $decoded : [];
 
         return $this->cache[$normalizedBasePath];
+    }
+
+    /**
+     * Resolve the manifest path for a module base path.
+     *
+     * @param string $base
+     * @return string|null
+     */
+    private function resolveManifestPath(string $base): ?string
+    {
+        $vitePath = public_path($base.'/.vite/manifest.json');
+        if ($this->files->exists($vitePath)) {
+            return $vitePath;
+        }
+
+        $rootPath = public_path($base.'/manifest.json');
+        if ($this->files->exists($rootPath)) {
+            return $rootPath;
+        }
+
+        return null;
     }
 
     /**

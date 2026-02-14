@@ -19,7 +19,8 @@ class ModuleRegistry
     /**
      * Register a module definition.
      *
-     * Why: Each module's service provider should contribute its entrypoints here.
+     * Why: Each module's service provider should contribute its entrypoints here, and the registry
+     *      must allow multiple entries per context without overwriting prior registrations.
      *
      * @param ModuleDefinition $definition
      * @return void
@@ -76,6 +77,8 @@ class ModuleRegistry
     /**
      * Get all module entries matching a runtime context.
      *
+     * Why: Multiple entries can exist per module/context, so we flatten while preserving order.
+     *
      * @param string $context
      * @return ModuleEntry[]
      */
@@ -84,9 +87,9 @@ class ModuleRegistry
         $entries = [];
 
         foreach ($this->modules as $definition) {
-            $entry = $definition->entryForContext($context);
-            if ($entry) {
-                $entries[] = $entry;
+            $contextEntries = $definition->entriesForContext($context);
+            if (!empty($contextEntries)) {
+                $entries = array_merge($entries, $contextEntries);
             }
         }
 

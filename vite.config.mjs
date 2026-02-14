@@ -3,6 +3,7 @@
  *
  * Purpose: Build runtime entrypoints and vendor bridges for import maps.
  * Role: Produces the ESM assets published to public/vendor/john-it-com/bc-ui-runtime.
+ * Note: Preserves entry exports so runtime APIs remain available as named exports.
  */
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -26,4 +27,11 @@ export default createBcViteConfig({
     outDir: 'src/Resources/dist',
     useDefaultExternals: false,
     externals: [],
+    rollupOptions: {
+        // Keep named exports on runtime entries (e.g., bootstrapBladeApp).
+        preserveEntrySignatures: 'exports-only',
+        output: {
+            exports: 'named',
+        },
+    },
 });

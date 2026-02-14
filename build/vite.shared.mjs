@@ -3,6 +3,7 @@
  *
  * Purpose: Standardize ESM builds across modules and enforce shared externals.
  * Role: Keeps all module bundles compatible with bc-ui-runtime import maps.
+ * Notes: Allows per-module Rollup overrides to keep runtime entry exports intact when needed.
  */
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
@@ -27,6 +28,7 @@ const DEFAULT_EXTERNALS = [
  *  externals?: string[],
  *  alias?: Record<string, string>,
  *  useDefaultExternals?: boolean,
+ *  rollupOptions?: import('rollup').RollupOptions,
  * }} options
  * @returns {import('vite').UserConfig}
  */
@@ -37,6 +39,12 @@ export function createBcViteConfig(options) {
     const externals = includeDefaults
         ? [...DEFAULT_EXTERNALS, ...(options.externals || [])]
         : (options.externals || []);
+
+    const rollupOptions = {
+        input: options.input,
+        external: externals,
+        ...(options.rollupOptions || {}),
+    };
 
     return defineConfig({
         root,
@@ -54,10 +62,7 @@ export function createBcViteConfig(options) {
             emptyOutDir: true,
             manifest: true,
             target: 'es2020',
-            rollupOptions: {
-                input: options.input,
-                external: externals,
-            },
+            rollupOptions,
         },
     });
 }

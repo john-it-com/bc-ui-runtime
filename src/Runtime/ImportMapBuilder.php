@@ -4,7 +4,8 @@
  * ImportMapBuilder.
  *
  * Purpose: Build import maps, module lists, and CSS links for bc-ui-runtime bootstraps.
- * Role: Translates module registry entries and Vite manifests into browser-consumable assets.
+ * Role: Translates module registry entries (including multiple entries per context) and Vite
+ *       manifests into browser-consumable assets.
  */
 
 namespace JohnIt\Bc\Runtime\Runtime;
@@ -48,9 +49,14 @@ class ImportMapBuilder
     public function buildImportMap(string $context): array
     {
         $imports = $this->buildSharedDependencyImports();
+        $seenSpecifiers = array_fill_keys(array_keys($imports), true);
 
         foreach ($this->registry->entriesForContext($context) as $entry) {
             if ($entry->legacy) {
+                continue;
+            }
+            // Prevent accidental overrides of shared dependencies or earlier registrations.
+            if (isset($seenSpecifiers[$entry->importSpecifier])) {
                 continue;
             }
             $publicBasePath = $entry->publicBasePath ?? $this->defaultPublicPathForModule($entry->importSpecifier);
@@ -58,6 +64,7 @@ class ImportMapBuilder
 
             if ($resolved !== null) {
                 $imports[$entry->importSpecifier] = $resolved;
+                $seenSpecifiers[$entry->importSpecifier] = true;
             }
         }
 
@@ -67,18 +74,29 @@ class ImportMapBuilder
     /**
      * Build a list of module import specifiers for a runtime context.
      *
+     * Why: Contexts can include multiple entries, so we de-duplicate specifiers
+     *      while preserving registration order.
+     *
      * @param string $context
      * @return string[]
      */
     public function buildModuleList(string $context): array
     {
-        return array_values(array_map(
-            fn (ModuleEntry $entry) => $entry->importSpecifier,
-            array_filter(
-                $this->registry->entriesForContext($context),
-                fn (ModuleEntry $entry) => $entry->legacy === false
-            )
-        ));
+        $modules = [];
+        $seenSpecifiers = [];
+
+        foreach ($this->registry->entriesForContext($context) as $entry) {
+            if ($entry->legacy) {
+                continue;
+            }
+            if (isset($seenSpecifiers[$entry->importSpecifier])) {
+                continue;
+            }
+            $seenSpecifiers[$entry->importSpecifier] = true;
+            $modules[] = $entry->importSpecifier;
+        }
+
+        return $modules;
     }
 
     /**
