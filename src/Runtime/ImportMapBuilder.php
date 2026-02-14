@@ -1,0 +1,198 @@
+<?php
+
+/**
+ * ImportMapBuilder.
+ *
+ * Purpose: Build import maps, module lists, and CSS links for bc-ui-runtime bootstraps.
+ * Role: Translates module registry entries and Vite manifests into browser-consumable assets.
+ */
+
+namespace JohnIt\Bc\Runtime\Runtime;
+
+use JohnIt\Bc\Runtime\Runtime\Manifest\ViteManifestRepository;
+
+class ImportMapBuilder
+{
+    /**
+     * Manifest keys for shared runtime dependencies managed by bc-ui-runtime.
+     *
+     * @var array<string, string>
+     */
+    private const SHARED_DEPENDENCY_ENTRIES = [
+        'vue' => 'src/Resources/js/vendor/vue.js',
+        'pinia' => 'src/Resources/js/vendor/pinia.js',
+        'vue-i18n' => 'src/Resources/js/vendor/vue-i18n.js',
+        '@inertiajs/vue3' => 'src/Resources/js/vendor/inertia-vue3.js',
+        'ziggy-js' => 'src/Resources/js/vendor/ziggy.js',
+        'bc-ui-runtime' => 'src/Resources/js/runtime/index.js',
+        'bc-ui-runtime/inertia' => 'src/Resources/js/runtime/inertia.js',
+        'bc-ui-runtime/blade' => 'src/Resources/js/runtime/blade.js',
+    ];
+
+    /**
+     * @param ModuleRegistry $registry
+     * @param ViteManifestRepository $manifestRepository
+     */
+    public function __construct(
+        private readonly ModuleRegistry $registry,
+        private readonly ViteManifestRepository $manifestRepository,
+    ) {
+    }
+
+    /**
+     * Build the import map array for a runtime context.
+     *
+     * @param string $context
+     * @return array<string, array<string, string>>
+     */
+    public function buildImportMap(string $context): array
+    {
+        $imports = $this->buildSharedDependencyImports();
+
+        foreach ($this->registry->entriesForContext($context) as $entry) {
+            if ($entry->legacy) {
+                continue;
+            }
+            $publicBasePath = $entry->publicBasePath ?? $this->defaultPublicPathForModule($entry->importSpecifier);
+            $resolved = $this->resolveEntryFile($publicBasePath, $entry->manifestKey);
+
+            if ($resolved !== null) {
+                $imports[$entry->importSpecifier] = $resolved;
+            }
+        }
+
+        return ['imports' => $imports];
+    }
+
+    /**
+     * Build a list of module import specifiers for a runtime context.
+     *
+     * @param string $context
+     * @return string[]
+     */
+    public function buildModuleList(string $context): array
+    {
+        return array_values(array_map(
+            fn (ModuleEntry $entry) => $entry->importSpecifier,
+            array_filter(
+                $this->registry->entriesForContext($context),
+                fn (ModuleEntry $entry) => $entry->legacy === false
+            )
+        ));
+    }
+
+    /**
+     * Build a list of legacy script URLs for a runtime context.
+     *
+     * @param string $context
+     * @return string[]
+     */
+    public function buildLegacyScripts(string $context): array
+    {
+        $scripts = [];
+
+        foreach ($this->registry->legacyEntriesForContext($context) as $entry) {
+            $publicBasePath = $entry->publicBasePath ?? $this->defaultPublicPathForModule($entry->importSpecifier);
+            $resolved = $this->resolveEntryFile($publicBasePath, $entry->manifestKey);
+
+            if ($resolved !== null) {
+                $scripts[] = $resolved;
+            }
+        }
+
+        return array_values(array_unique($scripts));
+    }
+
+    /**
+     * Build a list of CSS URLs for a runtime context.
+     *
+     * @param string $context
+     * @return string[]
+     */
+    public function buildStyles(string $context): array
+    {
+        $styles = [];
+
+        foreach ($this->registry->entriesForContext($context) as $entry) {
+            $publicBasePath = $entry->publicBasePath ?? $this->defaultPublicPathForModule($entry->importSpecifier);
+            $styles = array_merge(
+                $styles,
+                $this->manifestRepository->resolveCss($publicBasePath, $entry->manifestKey)
+            );
+        }
+
+        return array_values(array_unique($styles));
+    }
+
+    /**
+     * Build import-map entries for shared runtime dependencies.
+     *
+     * @return array<string, string>
+     */
+    private function buildSharedDependencyImports(): array
+    {
+        $imports = [];
+        $runtimeBase = 'vendor/john-it-com/bc-ui-runtime';
+
+        foreach (self::SHARED_DEPENDENCY_ENTRIES as $specifier => $manifestKey) {
+            $resolved = $this->resolveEntryFile($runtimeBase, $manifestKey);
+            if ($resolved !== null) {
+                $imports[$specifier] = $resolved;
+            }
+        }
+
+        return $imports;
+    }
+
+    /**
+     * Resolve a manifest entry to a public URL, falling back to a non-hashed path.
+     *
+     * @param string $publicBasePath
+     * @param string $manifestKey
+     * @return string|null
+     */
+    private function resolveEntryFile(string $publicBasePath, string $manifestKey): ?string
+    {
+        $resolved = $this->manifestRepository->resolveFile($publicBasePath, $manifestKey);
+
+        if ($resolved !== null) {
+            return $resolved;
+        }
+
+        // Fallback to a non-hashed filename for development or before manifests are built.
+        $fallbackFile = $this->fallbackFileForKey($manifestKey);
+        $base = trim($publicBasePath, '/');
+
+        return $fallbackFile === '' ? null : '/'.$base.'/'.$fallbackFile;
+    }
+
+    /**
+     * Determine a fallback filename from a manifest key.
+     *
+     * Why: Legacy bundles may use output paths (app.js, shop/app.js), while Vite uses source paths.
+     *
+     * @param string $manifestKey
+     * @return string
+     */
+    private function fallbackFileForKey(string $manifestKey): string
+    {
+        if (str_contains($manifestKey, 'src/')) {
+            return basename($manifestKey);
+        }
+
+        return ltrim($manifestKey, '/');
+    }
+
+    /**
+     * Infer the default public base path from a module import specifier.
+     *
+     * @param string $importSpecifier
+     * @return string
+     */
+    private function defaultPublicPathForModule(string $importSpecifier): string
+    {
+        $moduleName = explode('/', $importSpecifier)[0] ?? $importSpecifier;
+
+        return 'vendor/john-it-com/'.$moduleName;
+    }
+}

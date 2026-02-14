@@ -1,0 +1,45 @@
+{
+    "name": "john-it-com/bc-ui-runtime",
+    "description": "Runtime bootstrap and module registry for BlueCloud frontend modules.",
+    "keywords": [
+        "laravel",
+        "runtime",
+        "inertia",
+        "vue"
+    ],
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "JOHN IT GmbH",
+            "email": "info@john-it.com",
+            "homepage": "https://john-it.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "JohnIt\\Bc\\Runtime\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "JohnIt\\Bc\\Runtime\\Tests\\": "tests"
+        }
+    },
+    "extra": {
+        "documentation": {
+            "purpose": "Describe the bc-ui-runtime package and its role as the shared runtime for ESM module registration.",
+            "role": "Provides the runtime registry, Blade directives, and asset publishing used by all bc-* frontend modules."
+        },
+        "laravel": {
+            "providers": [
+                "JohnIt\\Bc\\Runtime\\PackageServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "require": {
+        "php": "^8.2",
+        "laravel/framework": "^11.18"
+    }
+}
