@@ -1,0 +1,28 @@
+{
+  "name": "bc-ui-runtime",
+  "version": "1.0.0",
+  "description": "Shared runtime build for BlueCloud ESM module registration.",
+  "documentation": {
+    "purpose": "Describe the bc-ui-runtime frontend build configuration for module consumers.",
+    "role": "Defines the Vite-based scripts and dependencies used to build the shared runtime and vendor bridges."
+  },
+  "scripts": {
+    "dev": "vite build --watch",
+    "watch": "vite build --watch",
+    "build": "vite build",
+    "production": "vite build"
+  },
+  "author": "",
+  "license": "proprietary",
+  "devDependencies": {
+    "@inertiajs/vue3": "^1.1.0",
+    "@vitejs/plugin-vue": "^5.0.5",
+    "@vue/compiler-sfc": "^3.1.2",
+    "pinia": "^3.0.3",
+    "pinia-plugin-persistedstate": "^4.5.0",
+    "vite": "^5.3.1",
+    "vue": "^3.1.0",
+    "vue-i18n": "^10.0.0",
+    "ziggy-js": "^2.6.0"
+  }
+}
