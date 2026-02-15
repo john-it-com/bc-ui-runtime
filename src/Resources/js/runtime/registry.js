@@ -81,23 +81,6 @@ export function resolvePage(name) {
         }
     }
 
-    // Legacy fallback: scan global namespaces for UMD page maps during the migration window.
-    if (typeof window !== 'undefined') {
-        const windowKeys = Object.keys(window);
-        for (const key of windowKeys) {
-            const candidate = window[key];
-            if (!candidate) {
-                continue;
-            }
-            if (candidate.pages && candidate.pages[name]) {
-                return candidate.pages[name];
-            }
-            if (key.endsWith('Pages') && candidate[name]) {
-                return candidate[name];
-            }
-        }
-    }
-
     return null;
 }
 

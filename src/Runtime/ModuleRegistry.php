@@ -3,11 +3,15 @@
 /**
  * ModuleRegistry.
  *
- * Purpose: Maintain an in-memory registry of bc module frontend entries.
- * Role: Provides the authoritative module list for building import maps and runtime bootstraps.
+ * Purpose: Maintain an in-memory registry of bc module frontend entries and Tailwind content globs.
+ * Role: Provides the authoritative module list for building import maps, runtime bootstraps,
+ *       and centralized Tailwind content manifests.
  */
 
 namespace JohnIt\Bc\Runtime\Runtime;
+
+use JohnIt\Bc\Runtime\Runtime\Tailwind\TailwindContentEntry;
+use JohnIt\Bc\Runtime\Runtime\Tailwind\TailwindContentRegistry;
 
 class ModuleRegistry
 {
@@ -15,6 +19,19 @@ class ModuleRegistry
      * @var array<string, ModuleDefinition>
      */
     private array $modules = [];
+
+    /**
+     * @var TailwindContentRegistry
+     */
+    private TailwindContentRegistry $tailwindContentRegistry;
+
+    /**
+     * @param TailwindContentRegistry|null $tailwindContentRegistry
+     */
+    public function __construct(?TailwindContentRegistry $tailwindContentRegistry = null)
+    {
+        $this->tailwindContentRegistry = $tailwindContentRegistry ?? new TailwindContentRegistry();
+    }
 
     /**
      * Register a module definition.
@@ -28,6 +45,32 @@ class ModuleRegistry
     public function registerModule(ModuleDefinition $definition): void
     {
         $this->modules[$definition->name] = $definition;
+    }
+
+    /**
+     * Register Tailwind content globs for a Tailwind content context.
+     *
+     * Why: Each module can contribute its own templates/components without central hardcoding.
+     *
+     * @param string $context
+     * @param string $moduleName
+     * @param string $basePath
+     * @param string[] $globs
+     * @return void
+     */
+    public function registerTailwindContent(
+        string $context,
+        string $moduleName,
+        string $basePath,
+        array $globs,
+    ): void {
+        $entry = new TailwindContentEntry(
+            moduleName: $moduleName,
+            basePath: $basePath,
+            globs: $globs,
+        );
+
+        $this->tailwindContentRegistry->register($context, $entry);
     }
 
     /**
@@ -94,6 +137,17 @@ class ModuleRegistry
         }
 
         return $entries;
+    }
+
+    /**
+     * Get Tailwind content entries matching a runtime context.
+     *
+     * @param string $context
+     * @return TailwindContentEntry[]
+     */
+    public function tailwindEntriesForContext(string $context): array
+    {
+        return $this->tailwindContentRegistry->entriesForContext($context);
     }
 
     /**

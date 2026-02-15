@@ -3,14 +3,15 @@
 /**
  * Package service provider for the bc-ui-runtime module.
  *
- * Purpose: Register the runtime registry, import-map builder, and Blade directives used to bootstrap ESM modules.
- * Role: Centralizes runtime asset publishing and frontend bootstrapping for all bc-* packages.
+ * Purpose: Register runtime registries, import-map builders, and Blade directives used to bootstrap ESM modules.
+ * Role: Centralizes runtime asset publishing, Tailwind content aggregation, and frontend bootstrapping for all bc-* packages.
  */
 
 namespace JohnIt\Bc\Runtime;
 
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
+use JohnIt\Bc\Runtime\Console\Commands\BuildTailwindContentManifest;
 use JohnIt\Bc\Runtime\Runtime\Blade\RuntimeBladeRenderer;
 use JohnIt\Bc\Runtime\Runtime\ImportMapBuilder;
 use JohnIt\Bc\Runtime\Runtime\Manifest\ViteManifestRepository;
@@ -89,5 +90,11 @@ class PackageServiceProvider extends ServiceProvider
 
             return "<?php echo app(\\".RuntimeBladeRenderer::class."::class)->renderLegacyScripts({$contextExpression}); ?>";
         });
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                BuildTailwindContentManifest::class,
+            ]);
+        }
     }
 }
