@@ -6,6 +6,7 @@
  * Purpose: Resolve entry files and CSS assets from Vite manifest files in public builds.
  * Role: Allows bc-ui-runtime to build import maps and style links from published module assets.
  * Notes: Supports both Vite's default ".vite/manifest.json" and a root-level manifest.json.
+ *        Resolved paths are converted to full asset URLs to support Vapor/CDN environments.
  */
 
 namespace JohnIt\Bc\Runtime\Runtime\Manifest;
@@ -97,8 +98,9 @@ class ViteManifestRepository
 
         $file = ltrim((string) $entry['file'], '/');
         $base = trim($this->normalizePublicBasePath($publicBasePath), '/');
+        $path = $base === '' ? $file : $base.'/'.$file;
 
-        return '/'.$base.'/'.$file;
+        return asset($path);
     }
 
     /**
@@ -121,7 +123,8 @@ class ViteManifestRepository
 
         return array_map(function ($file) use ($base) {
             $filePath = ltrim((string) $file, '/');
-            return '/'.$base.'/'.$filePath;
+            $path = $base === '' ? $filePath : $base.'/'.$filePath;
+            return asset($path);
         }, $entry['css']);
     }
 

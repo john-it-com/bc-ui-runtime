@@ -12,7 +12,7 @@ const defaultTheme = require(
 module.exports = {
     safelist: [
         {
-            pattern: /^(text|bg|ring)-(primary|secondary|light|success|warning|danger|info)(-\d+)?(\/\d+)?$/,
+            pattern: /^(text|bg|ring|fill)-(primary|secondary|light|success|warning|danger|info)(-\d+)?(\/\d+)?$/,
         }
     ],
     theme: {

@@ -181,7 +181,13 @@ class ImportMapBuilder
         $fallbackFile = $this->fallbackFileForKey($manifestKey);
         $base = trim($publicBasePath, '/');
 
-        return $fallbackFile === '' ? null : '/'.$base.'/'.$fallbackFile;
+        if ($fallbackFile === '') {
+            return null;
+        }
+
+        $path = $base === '' ? $fallbackFile : $base.'/'.$fallbackFile;
+
+        return asset($path);
     }
 
     /**
