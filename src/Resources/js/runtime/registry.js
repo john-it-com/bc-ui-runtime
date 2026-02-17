@@ -6,10 +6,13 @@
  */
 
 /**
+ * @typedef {Object} ModuleRuntimeContext
+ * @property {{ props?: any, page?: any, pageProps?: Record<string, any> } | undefined} inertia
+ *
  * @typedef {Object} ModuleRegistration
  * @property {string} name
  * @property {Record<string, any>} pages
- * @property {Array<(app: import('vue').App) => void>} registers
+ * @property {Array<(app: import('vue').App, context?: ModuleRuntimeContext) => void>} registers
  * @property {number} priority
  */
 
@@ -24,7 +27,7 @@ const pageIndex = new Map();
  * @param {{
  *  name: string,
  *  pages?: Record<string, any>,
- *  register?: ((app: import('vue').App) => void) | Array<(app: import('vue').App) => void>,
+ *  register?: ((app: import('vue').App, context?: ModuleRuntimeContext) => void) | Array<(app: import('vue').App, context?: ModuleRuntimeContext) => void>,
  *  priority?: number,
  * }} definition
  */
@@ -88,14 +91,15 @@ export function resolvePage(name) {
  * Register all module-provided global components and plugins on a Vue app.
  *
  * @param {import('vue').App} app
+ * @param {ModuleRuntimeContext} [context]
  */
-export function registerAllModules(app) {
+export function registerAllModules(app, context = {}) {
     const orderedModules = Array.from(moduleRegistry.values()).sort((a, b) => a.priority - b.priority);
 
     orderedModules.forEach((module) => {
         module.registers.forEach((register) => {
             if (typeof register === 'function') {
-                register(app);
+                register(app, context);
             }
         });
     });

@@ -2,7 +2,7 @@
  * Inertia/Vue runtime bootstrap for bc-ui-runtime.
  *
  * Purpose: Create the Inertia app, resolve pages from registered modules, and install shared plugins.
- * Role: Provides the single, stable runtime entrypoint for all admin Inertia pages.
+ * Role: Provides the single, stable runtime entrypoint for all admin Inertia pages and runtime hooks.
  */
 import { createApp, h } from 'vue';
 import { createInertiaApp, router } from '@inertiajs/vue3';
@@ -79,7 +79,17 @@ export function bootstrapInertiaApp() {
                 vueApp.use(ZiggyVue, ziggyOptions);
             }
 
-            registerAllModules(vueApp);
+            const inertiaPage = props?.initialPage || props?.page || null;
+            const inertiaPageProps = inertiaPage?.props || props?.props || {};
+
+            // Provide module registers access to Inertia props for runtime-specific initialization.
+            registerAllModules(vueApp, {
+                inertia: {
+                    props,
+                    page: inertiaPage,
+                    pageProps: inertiaPageProps,
+                },
+            });
             vueApp.use(plugin);
 
             router.on('navigate', (event) => {

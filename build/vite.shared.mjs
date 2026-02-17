@@ -3,7 +3,7 @@
  *
  * Purpose: Standardize ESM builds across modules and enforce shared externals.
  * Role: Keeps all module bundles compatible with bc-ui-runtime import maps.
- * Notes: Allows per-module Rollup overrides to keep runtime entry exports intact when needed.
+ * Notes: Enables sourcemaps for Sentry so production stack traces map to source.
  */
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
@@ -61,6 +61,7 @@ export function createBcViteConfig(options) {
             outDir,
             emptyOutDir: true,
             manifest: true,
+            sourcemap: true,
             target: 'es2020',
             rollupOptions,
         },
