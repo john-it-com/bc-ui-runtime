@@ -43,6 +43,9 @@ class ImportMapBuilder
     /**
      * Build the import map array for a runtime context.
      *
+     * Why: Import maps must point to publicly accessible asset URLs, including
+     *      Vapor's CloudFront asset domain when ASSET_URL is configured.
+     *
      * @param string $context
      * @return array<string, array<string, string>>
      */
@@ -102,6 +105,8 @@ class ImportMapBuilder
     /**
      * Build a list of legacy script URLs for a runtime context.
      *
+     * Why: Legacy bundles still need full asset URLs when ASSET_URL is set.
+     *
      * @param string $context
      * @return string[]
      */
@@ -124,6 +129,8 @@ class ImportMapBuilder
     /**
      * Build a list of CSS URLs for a runtime context.
      *
+     * Why: CSS links must resolve through the configured asset base URL (CloudFront on Vapor).
+     *
      * @param string $context
      * @return string[]
      */
@@ -135,7 +142,10 @@ class ImportMapBuilder
             $publicBasePath = $entry->publicBasePath ?? $this->defaultPublicPathForModule($entry->importSpecifier);
             $styles = array_merge(
                 $styles,
-                $this->manifestRepository->resolveCss($publicBasePath, $entry->manifestKey)
+                array_map(
+                    fn (string $path) => $this->toAssetUrl($path),
+                    $this->manifestRepository->resolveCss($publicBasePath, $entry->manifestKey)
+                )
             );
         }
 
@@ -165,6 +175,8 @@ class ImportMapBuilder
     /**
      * Resolve a manifest entry to a public URL, falling back to a non-hashed path.
      *
+     * Why: All module assets must be served from the configured asset base URL.
+     *
      * @param string $publicBasePath
      * @param string $manifestKey
      * @return string|null
@@ -174,7 +186,7 @@ class ImportMapBuilder
         $resolved = $this->manifestRepository->resolveFile($publicBasePath, $manifestKey);
 
         if ($resolved !== null) {
-            return $resolved;
+            return $this->toAssetUrl($resolved);
         }
 
         // Fallback to a non-hashed filename for development or before manifests are built.
@@ -218,5 +230,32 @@ class ImportMapBuilder
         $moduleName = explode('/', $importSpecifier)[0] ?? $importSpecifier;
 
         return 'vendor/john-it-com/'.$moduleName;
+    }
+
+    /**
+     * Convert a public path into a fully qualified asset URL.
+     *
+     * Why: Ensures asset references respect ASSET_URL (CloudFront on Vapor).
+     *
+     * @param string $path
+     * @return string
+     */
+    private function toAssetUrl(string $path): string
+    {
+        $trimmed = trim($path);
+
+        if ($trimmed === '') {
+            return $path;
+        }
+
+        if (str_starts_with($trimmed, 'http://') || str_starts_with($trimmed, 'https://')) {
+            return $trimmed;
+        }
+
+        if (str_starts_with($trimmed, '//')) {
+            return $trimmed;
+        }
+
+        return asset(ltrim($trimmed, '/'));
     }
 }
