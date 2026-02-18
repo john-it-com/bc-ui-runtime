@@ -29,6 +29,7 @@ const DEFAULT_EXTERNALS = [
  *  alias?: Record<string, string>,
  *  useDefaultExternals?: boolean,
  *  rollupOptions?: import('rollup').RollupOptions,
+ *  publicDir?: false | string,
  * }} options
  * @returns {import('vite').UserConfig}
  */
@@ -48,6 +49,7 @@ export function createBcViteConfig(options) {
 
     return defineConfig({
         root,
+        publicDir: options.publicDir,
         plugins: [
             vue(),
         ],
