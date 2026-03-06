@@ -15,7 +15,7 @@ const DEFAULT_EXTERNALS = [
     'vue-i18n',
     '@inertiajs/vue3',
     'ziggy-js',
-    'bc-ui-runtime',
+    '@john-it.com/bc-ui-runtime',
 ];
 
 /**

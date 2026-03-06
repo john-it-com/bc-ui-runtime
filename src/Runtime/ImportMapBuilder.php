@@ -28,6 +28,9 @@ class ImportMapBuilder
         'bc-ui-runtime' => 'src/Resources/js/runtime/index.ts',
         'bc-ui-runtime/inertia' => 'src/Resources/js/runtime/inertia.ts',
         'bc-ui-runtime/blade' => 'src/Resources/js/runtime/blade.ts',
+        '@john-it.com/bc-ui-runtime' => 'src/Resources/js/runtime/index.ts',
+        '@john-it.com/bc-ui-runtime/inertia' => 'src/Resources/js/runtime/inertia.ts',
+        '@john-it.com/bc-ui-runtime/blade' => 'src/Resources/js/runtime/blade.ts',
     ];
 
     /**
@@ -227,7 +230,12 @@ class ImportMapBuilder
      */
     private function defaultPublicPathForModule(string $importSpecifier): string
     {
-        $moduleName = explode('/', $importSpecifier)[0] ?? $importSpecifier;
+        $parts = explode('/', $importSpecifier);
+        $moduleName = $parts[0] ?? $importSpecifier;
+
+        if (str_starts_with($moduleName, '@') && isset($parts[1])) {
+            $moduleName = $parts[1];
+        }
 
         return 'vendor/john-it-com/'.$moduleName;
     }

@@ -1,10 +1,14 @@
 {
-  "name": "bc-ui-runtime",
-  "version": "1.0.0",
+  "name": "@john-it.com/bc-ui-runtime",
+  "version": "1.4.0",
   "description": "Shared runtime build for BlueCloud ESM module registration.",
   "documentation": {
     "purpose": "Describe the bc-ui-runtime frontend build configuration for module consumers.",
-    "role": "Defines the Vite-based scripts, typecheck workflow, and dependencies used to build the shared runtime and vendor bridges."
+    "role": "Defines the Vite-based scripts, typecheck workflow, and dependencies used to build the shared runtime and publish its shared TypeScript types."
+  },
+  "types": "src/Resources/js/types/index.d.ts",
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "dev": "vite build --watch",
