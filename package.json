@@ -4,12 +4,23 @@
   "description": "Shared runtime build for BlueCloud ESM module registration.",
   "documentation": {
     "purpose": "Describe the bc-ui-runtime frontend build configuration for module consumers.",
-    "role": "Defines the Vite-based scripts, typecheck workflow, and dependencies used to build the shared runtime and publish its shared TypeScript types."
+    "role": "Defines the Vite-based scripts, typecheck workflow, and dependencies used to build and publish the shared runtime with a curated npm file list."
   },
   "types": "src/Resources/js/types/index.d.ts",
   "publishConfig": {
     "access": "public"
   },
+  "files": [
+    "build",
+    "src/Console",
+    "src/Resources/dist",
+    "src/Resources/js",
+    "src/Runtime",
+    "src/Support",
+    "composer.json",
+    "tsconfig.json",
+    "vite.config.mjs"
+  ],
   "scripts": {
     "dev": "vite build --watch",
     "watch": "vite build --watch",
