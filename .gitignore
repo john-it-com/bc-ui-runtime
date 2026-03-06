@@ -1,3 +1,6 @@
+# File: .gitignore
+# Purpose: Define ignored artifacts for the bc-ui-runtime package.
+# Role: Keeps build, cache, and dependency directories out of version control while allowing runtime entry sources.
 .idea
 .php_cs
 .php_cs.cache
@@ -7,6 +10,6 @@ composer.lock
 coverage
 phpstan.neon
 testbench.yaml
-vendor
+/vendor
 node_modules
 .php-cs-fixer.cache
