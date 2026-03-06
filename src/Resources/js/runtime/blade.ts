@@ -7,11 +7,12 @@
 import { createApp } from 'vue';
 import { exposeGlobals, setupSharedPlugins } from './shared';
 import { registerAllModules } from './registry';
+import type { App } from 'vue';
 
 // Ensure Vue/Pinia/I18n/Inertia are shared globals for compatibility with legacy integrations.
 exposeGlobals();
 
-let appInstance = null;
+let appInstance: App | null = null;
 
 /**
  * Load runtime modules by import specifier.
@@ -19,7 +20,7 @@ let appInstance = null;
  * @param {string[]} moduleList
  * @returns {Promise<void>}
  */
-export async function loadModules(moduleList = []) {
+export async function loadModules(moduleList: string[] = []): Promise<void> {
     if (!Array.isArray(moduleList) || moduleList.length === 0) {
         return;
     }
@@ -30,9 +31,9 @@ export async function loadModules(moduleList = []) {
 /**
  * Initialize and return the Blade-driven Vue application.
  *
- * @returns {import('vue').App}
+ * @returns {App}
  */
-export function bootstrapBladeApp() {
+export function bootstrapBladeApp(): App {
     if (appInstance) {
         return appInstance;
     }

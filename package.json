@@ -4,13 +4,14 @@
   "description": "Shared runtime build for BlueCloud ESM module registration.",
   "documentation": {
     "purpose": "Describe the bc-ui-runtime frontend build configuration for module consumers.",
-    "role": "Defines the Vite-based scripts and dependencies used to build the shared runtime and vendor bridges."
+    "role": "Defines the Vite-based scripts, typecheck workflow, and dependencies used to build the shared runtime and vendor bridges."
   },
   "scripts": {
     "dev": "vite build --watch",
     "watch": "vite build --watch",
     "build": "vite build",
-    "production": "vite build"
+    "production": "vite build",
+    "typecheck": "vue-tsc --noEmit"
   },
   "author": "",
   "license": "proprietary",
@@ -23,6 +24,8 @@
     "vite": "^5.3.1",
     "vue": "^3.1.0",
     "vue-i18n": "^10.0.0",
-    "ziggy-js": "^2.6.0"
+    "ziggy-js": "^2.6.0",
+    "typescript": "^5.4.5",
+    "vue-tsc": "^2.0.28"
   }
 }

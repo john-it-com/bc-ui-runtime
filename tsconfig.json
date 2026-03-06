@@ -1,0 +1,28 @@
+{
+  "documentation": {
+    "purpose": "Define TypeScript compiler settings for the bc-ui-runtime package.",
+    "role": "Enables strict typechecking and Vue-aware module resolution for the runtime source files."
+  },
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2020", "DOM"],
+    "jsx": "preserve",
+    "strict": true,
+    "useDefineForClassFields": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "allowJs": false,
+    "checkJs": false,
+    "types": ["vite/client"]
+  },
+  "include": [
+    "src/Resources/js/**/*.ts",
+    "src/Resources/js/**/*.vue",
+    "src/Resources/js/**/*.d.ts"
+  ]
+}

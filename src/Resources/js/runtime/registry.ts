@@ -4,34 +4,52 @@
  * Purpose: Collect module registrations (pages/components) in a single place.
  * Role: Enables bc-ui-runtime to resolve Inertia pages and register global components without hardcoding modules.
  */
+import type { App } from 'vue';
 
 /**
- * @typedef {Object} ModuleRuntimeContext
- * @property {{ props?: any, page?: any, pageProps?: Record<string, any> } | undefined} inertia
+ * Runtime context exposed to module register callbacks.
  *
- * @typedef {Object} ModuleRegistration
- * @property {string} name
- * @property {Record<string, any>} pages
- * @property {Array<(app: import('vue').App, context?: ModuleRuntimeContext) => void>} registers
- * @property {number} priority
+ * Why: Modules sometimes need access to Inertia props when wiring plugins or components.
  */
+export interface ModuleRuntimeContext {
+    inertia?: {
+        props?: Record<string, unknown>;
+        page?: unknown;
+        pageProps?: Record<string, unknown>;
+    };
+}
 
-const moduleRegistry = new Map();
-const pageIndex = new Map();
+/**
+ * Module registration payload stored in the runtime registry.
+ */
+export interface ModuleRegistration {
+    name: string;
+    pages: Record<string, unknown>;
+    registers: Array<(app: App, context?: ModuleRuntimeContext) => void>;
+    priority: number;
+}
+
+/**
+ * Module registration input definition.
+ */
+export interface ModuleDefinition {
+    name: string;
+    pages?: Record<string, unknown>;
+    register?: ((app: App, context?: ModuleRuntimeContext) => void) | Array<(app: App, context?: ModuleRuntimeContext) => void>;
+    priority?: number;
+}
+
+const moduleRegistry = new Map<string, ModuleRegistration>();
+const pageIndex = new Map<string, string>();
 
 /**
  * Register a module with the runtime registry.
  *
  * Why: Keeps module registration decentralized while allowing the runtime to resolve pages and components.
  *
- * @param {{
- *  name: string,
- *  pages?: Record<string, any>,
- *  register?: ((app: import('vue').App, context?: ModuleRuntimeContext) => void) | Array<(app: import('vue').App, context?: ModuleRuntimeContext) => void>,
- *  priority?: number,
- * }} definition
+ * @param {ModuleDefinition} definition
  */
-export function registerModule(definition) {
+export function registerModule(definition: ModuleDefinition): void {
     if (!definition || typeof definition.name !== 'string') {
         throw new Error('bc-ui-runtime: registerModule requires a module name.');
     }
@@ -75,9 +93,9 @@ export function registerModule(definition) {
  * Resolve an Inertia page component by name from all registered modules.
  *
  * @param {string} name
- * @returns {any | null}
+ * @returns {unknown | null}
  */
-export function resolvePage(name) {
+export function resolvePage(name: string): unknown | null {
     for (const module of moduleRegistry.values()) {
         if (module.pages && module.pages[name]) {
             return module.pages[name];
@@ -90,10 +108,10 @@ export function resolvePage(name) {
 /**
  * Register all module-provided global components and plugins on a Vue app.
  *
- * @param {import('vue').App} app
+ * @param {App} app
  * @param {ModuleRuntimeContext} [context]
  */
-export function registerAllModules(app, context = {}) {
+export function registerAllModules(app: App, context: ModuleRuntimeContext = {}): void {
     const orderedModules = Array.from(moduleRegistry.values()).sort((a, b) => a.priority - b.priority);
 
     orderedModules.forEach((module) => {
@@ -110,6 +128,6 @@ export function registerAllModules(app, context = {}) {
  *
  * @returns {ModuleRegistration[]}
  */
-export function listModules() {
+export function listModules(): ModuleRegistration[] {
     return Array.from(moduleRegistry.values());
 }

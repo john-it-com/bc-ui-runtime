@@ -9,11 +9,22 @@ import * as Pinia from 'pinia';
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
 import * as VueI18n from 'vue-i18n';
 import * as InertiaVue3 from '@inertiajs/vue3';
+import type { App } from 'vue';
+import type { Pinia as PiniaInstance } from 'pinia';
+import type { I18n, LocaleMessageValue } from 'vue-i18n';
+
+/**
+ * Shared i18n payload shape used by bc-ui-runtime.
+ */
+export interface I18nPayload {
+    locale?: string;
+    messages?: Record<string, LocaleMessageValue>;
+}
 
 /**
  * Expose Vue ecosystem globals for compatibility with legacy integrations.
  */
-export function exposeGlobals() {
+export function exposeGlobals(): void {
     window.Vue = window.Vue || Vue;
     window.Pinia = window.Pinia || Pinia;
     window.VueI18n = window.VueI18n || VueI18n;
@@ -23,11 +34,11 @@ export function exposeGlobals() {
 /**
  * Install shared plugins (Pinia with persistence, i18n) onto the provided Vue app instance.
  *
- * @param {import('vue').App} app The Vue app to configure.
- * @param {{locale?: string, messages?: Record<string, any>}} i18nPayload Optional i18n payload from the server.
- * @returns {{ pinia: import('pinia').Pinia, i18n: import('vue-i18n').I18n }}
+ * @param {App} app The Vue app to configure.
+ * @param {I18nPayload} i18nPayload Optional i18n payload from the server.
+ * @returns {{ pinia: PiniaInstance, i18n: I18n }}
  */
-export function setupSharedPlugins(app, i18nPayload = {}) {
+export function setupSharedPlugins(app: App, i18nPayload: I18nPayload = {}): { pinia: PiniaInstance; i18n: I18n } {
     const pinia = Pinia.createPinia();
     pinia.use(piniaPluginPersistedstate);
     app.use(pinia);
@@ -35,9 +46,9 @@ export function setupSharedPlugins(app, i18nPayload = {}) {
     const fallbackLocale = document.documentElement.getAttribute('lang') || 'en';
     const locale = i18nPayload.locale || fallbackLocale;
 
-    const fallbackMessages = (window.BcUiTailwind && (window.BcUiTailwind.messages || window.BcUiTailwind.default?.messages)) || {};
-    const rawMessages = i18nPayload.messages || fallbackMessages;
-    const messages = {};
+    const fallbackMessages = ((window.BcUiTailwind && (window.BcUiTailwind.messages || window.BcUiTailwind.default?.messages)) || {}) as Record<string, LocaleMessageValue>;
+    const rawMessages = (i18nPayload.messages || fallbackMessages) as Record<string, LocaleMessageValue> | undefined;
+    const messages: Record<string, Record<string, LocaleMessageValue>> = {};
 
     if (rawMessages && locale) {
         messages[locale] = rawMessages;
@@ -62,10 +73,10 @@ export function setupSharedPlugins(app, i18nPayload = {}) {
 /**
  * Update an existing i18n instance with new locale/messages from Inertia responses.
  *
- * @param {import('vue-i18n').I18n} i18n
- * @param {{ locale?: string, messages?: Record<string, any> }|undefined|null} payload
+ * @param {I18n} i18n
+ * @param {I18nPayload | undefined | null} payload
  */
-export function updateI18nMessages(i18n, payload) {
+export function updateI18nMessages(i18n: I18n, payload: I18nPayload | undefined | null): void {
     if (!payload || !i18n) {
         return;
     }
@@ -76,7 +87,7 @@ export function updateI18nMessages(i18n, payload) {
     const nextLocale = payload.locale || currentLocale || 'en';
 
     if (payload.messages) {
-        i18n.global.setLocaleMessage(nextLocale, payload.messages);
+        i18n.global.setLocaleMessage(nextLocale, payload.messages as Record<string, LocaleMessageValue>);
     }
 
     if (typeof i18n.global.locale === 'string') {

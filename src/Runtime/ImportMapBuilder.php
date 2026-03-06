@@ -20,14 +20,14 @@ class ImportMapBuilder
      * @var array<string, string>
      */
     private const SHARED_DEPENDENCY_ENTRIES = [
-        'vue' => 'src/Resources/js/vendor/vue.js',
-        'pinia' => 'src/Resources/js/vendor/pinia.js',
-        'vue-i18n' => 'src/Resources/js/vendor/vue-i18n.js',
-        '@inertiajs/vue3' => 'src/Resources/js/vendor/inertia-vue3.js',
-        'ziggy-js' => 'src/Resources/js/vendor/ziggy.js',
-        'bc-ui-runtime' => 'src/Resources/js/runtime/index.js',
-        'bc-ui-runtime/inertia' => 'src/Resources/js/runtime/inertia.js',
-        'bc-ui-runtime/blade' => 'src/Resources/js/runtime/blade.js',
+        'vue' => 'src/Resources/js/vendor/vue.ts',
+        'pinia' => 'src/Resources/js/vendor/pinia.ts',
+        'vue-i18n' => 'src/Resources/js/vendor/vue-i18n.ts',
+        '@inertiajs/vue3' => 'src/Resources/js/vendor/inertia-vue3.ts',
+        'ziggy-js' => 'src/Resources/js/vendor/ziggy.ts',
+        'bc-ui-runtime' => 'src/Resources/js/runtime/index.ts',
+        'bc-ui-runtime/inertia' => 'src/Resources/js/runtime/inertia.ts',
+        'bc-ui-runtime/blade' => 'src/Resources/js/runtime/blade.ts',
     ];
 
     /**
