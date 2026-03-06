@@ -1,6 +1,6 @@
 {
   "name": "@john-it.com/bc-ui-runtime",
-  "version": "1.4.3",
+  "version": "1.4.4",
   "description": "Shared runtime build for BlueCloud ESM module registration.",
   "documentation": {
     "purpose": "Describe the bc-ui-runtime frontend build configuration for module consumers.",
@@ -16,6 +16,10 @@
     "build": "vite build",
     "production": "vite build",
     "typecheck": "vue-tsc --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/john-it-com/bc-ui-runtime"
   },
   "author": "",
   "license": "proprietary",
