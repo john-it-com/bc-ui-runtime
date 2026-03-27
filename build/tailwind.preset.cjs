@@ -3,6 +3,7 @@
  *
  * Purpose: Centralize the shared design tokens and safelist rules used across modules.
  * Role: Lets each module keep local content scanning while sharing the same Tailwind theme.
+ * Constraint: Enforce class-based dark mode so browser/OS color-scheme does not auto-switch the UI.
  */
 // Resolve Tailwind from the consuming module so bc-ui-runtime does not need Tailwind installed.
 const defaultTheme = require(
@@ -10,6 +11,8 @@ const defaultTheme = require(
 );
 
 module.exports = {
+    // Class strategy disables automatic media-query dark mode unless app code explicitly sets `.dark`.
+    darkMode: 'class',
     safelist: [
         {
             pattern: /^(text|bg|ring|fill)-(primary|secondary|light|success|warning|danger|info)(-\d+)?(\/\d+)?$/,
