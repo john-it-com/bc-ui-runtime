@@ -20,6 +20,9 @@ module.exports = {
     ],
     theme: {
         extend: {
+            screens: {
+                '3xl': '112rem',
+            },
             fontFamily: {
                 sans: ['InterVariable', ...defaultTheme.fontFamily.sans],
             },
