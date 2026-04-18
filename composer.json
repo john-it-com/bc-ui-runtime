@@ -27,8 +27,8 @@
     },
     "extra": {
         "documentation": {
-            "purpose": "Describe the bc-ui-runtime package and its role as the shared runtime for ESM module registration.",
-            "role": "Provides the runtime registry, Blade directives, and asset publishing used by all bc-* frontend modules."
+            "purpose": "Describe the bc-ui-runtime package metadata, package-local quality tooling, test harness, and dependency requirements.",
+            "role": "Defines Composer autoloading, package-local Pest execution, package-local PHPStan analysis, and dependency requirements for the bc-ui-runtime module."
         },
         "laravel": {
             "providers": [
@@ -39,7 +39,33 @@
     "minimum-stability": "stable",
     "prefer-stable": true,
     "require": {
-        "php": "^8.2",
+        "php": "^8.3",
         "laravel/framework": "^11.18"
+    },
+    "scripts": {
+        "post-autoload-dump": [
+            "@php vendor/bin/testbench package:discover --ansi"
+        ],
+        "test": "vendor/bin/pest",
+        "test:parallel": "vendor/bin/pest --parallel --processes=4 --no-coverage",
+        "test:parallel:coverage": "vendor/bin/pest --parallel --processes=4 --coverage-text",
+        "analyse": "vendor/bin/phpstan analyse"
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true,
+            "phpstan/extension-installer": true
+        }
+    },
+    "require-dev": {
+        "larastan/larastan": "^3.9.2",
+        "orchestra/testbench": "^9.0.0",
+        "pestphp/pest": "^4.6.2",
+        "pestphp/pest-plugin-laravel": "^4.1.0",
+        "phpstan/extension-installer": "^1.1",
+        "phpstan/phpstan": "^2.1.40",
+        "phpstan/phpstan-deprecation-rules": "^2.0",
+        "phpstan/phpstan-phpunit": "^2.0"
     }
 }

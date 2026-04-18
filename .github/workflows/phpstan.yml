@@ -1,0 +1,52 @@
+# Purpose: Execute the package-local PHPStan analysis in CI for this module.
+# Role: Keeps static analysis separate from Pest while enforcing the module's package-local PHPStan configuration on
+# pushes and pull requests.
+
+name: PHPStan
+
+on:
+  push:
+    branches: [develop, master]
+    paths:
+      - '**.php'
+      - 'composer.json'
+      - 'phpstan.neon.dist'
+      - 'phpstan-baseline.neon'
+      - '.github/workflows/phpstan.yml'
+  pull_request:
+    branches: [develop, master]
+    paths:
+      - '**.php'
+      - 'composer.json'
+      - 'phpstan.neon.dist'
+      - 'phpstan-baseline.neon'
+      - '.github/workflows/phpstan.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  phpstan:
+    name: phpstan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          token: ${{ secrets.READ_ONLY_PAT }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+
+      - name: Install dependencies
+        run: composer update --prefer-stable --prefer-dist --no-interaction
+        env:
+          COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}
+
+      - name: Run PHPStan
+        run: composer run analyse -- --error-format=github

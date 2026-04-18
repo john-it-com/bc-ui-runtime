@@ -1,0 +1,6 @@
+# Purpose: Record package-local PHPStan suppressions that are intentionally accepted during incremental adoption.
+# Role: Allows level 8 static analysis to focus on newly introduced issues while existing findings are addressed
+# separately over time.
+
+parameters:
+    ignoreErrors: []

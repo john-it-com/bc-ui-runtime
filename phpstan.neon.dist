@@ -1,0 +1,12 @@
+# Purpose: Define the package-local PHPStan defaults for this module.
+# Role: Keeps static analysis scoped to this package so local runs and CI evaluate the same source paths and
+# incremental baseline.
+
+includes:
+    - phpstan-baseline.neon
+
+parameters:
+    level: 8
+    paths:
+        - src
+    tmpDir: build/phpstan
