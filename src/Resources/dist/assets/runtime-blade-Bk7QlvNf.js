@@ -1,0 +1,2 @@
+import{c as t}from"./vue-BEbO0gUy.js";import{e as a,s as e}from"./shared-D_1DJagH.js";import{registerAllModules as i}from"./runtime-GeW6OFn0.js";import"./pinia-BKHKIEEX.js";import"./vue-i18n-CjB2CTGt.js";import"./inertia-vue3-BZhGtU6h.js";a();let p=null;async function f(r=[]){!Array.isArray(r)||r.length===0||await Promise.all(r.map(o=>import(o)))}function A(){if(p)return p;const r=t({});return e(r,{}),i(r),window.AppVue=r,p=r,p}export{A as bootstrapBladeApp,f as loadModules};
+//# sourceMappingURL=runtime-blade-Bk7QlvNf.js.map
