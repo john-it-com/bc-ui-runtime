@@ -10,16 +10,15 @@
 namespace JohnIt\Bc\Runtime\Support;
 
 use Illuminate\Support\Facades\Facade;
+use JohnIt\Bc\Runtime\Runtime\ModuleRegistry;
 
 class BcUiRuntime extends Facade
 {
     /**
      * Resolve the underlying service key for the facade.
-     *
-     * @return string
      */
     protected static function getFacadeAccessor(): string
     {
-        return \JohnIt\Bc\Runtime\Runtime\ModuleRegistry::class;
+        return ModuleRegistry::class;
     }
 }

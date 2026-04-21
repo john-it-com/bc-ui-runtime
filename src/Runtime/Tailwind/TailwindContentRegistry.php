@@ -20,14 +20,10 @@ class TailwindContentRegistry
      * Register Tailwind content entry for a context.
      *
      * Why: Modules can register their own templates/components without central hardcoding.
-     *
-     * @param string $context
-     * @param TailwindContentEntry $entry
-     * @return void
      */
     public function register(string $context, TailwindContentEntry $entry): void
     {
-        if (!array_key_exists($context, $this->entries)) {
+        if (! array_key_exists($context, $this->entries)) {
             $this->entries[$context] = [];
         }
 
@@ -52,7 +48,6 @@ class TailwindContentRegistry
     /**
      * Return all Tailwind content entries for a context.
      *
-     * @param string $context
      * @return TailwindContentEntry[]
      */
     public function entriesForContext(string $context): array
@@ -63,8 +58,8 @@ class TailwindContentRegistry
     /**
      * Merge glob arrays while preserving order and removing duplicates.
      *
-     * @param string[] $first
-     * @param string[] $second
+     * @param  string[]  $first
+     * @param  string[]  $second
      * @return string[]
      */
     private function mergeGlobs(array $first, array $second): array

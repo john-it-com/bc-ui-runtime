@@ -23,13 +23,11 @@ class PackageServiceProvider extends ServiceProvider
      * Register runtime services in the container.
      *
      * Why: Modules need a shared registry and import-map builder during boot.
-     *
-     * @return void
      */
     public function register(): void
     {
         $this->app->singleton(ModuleRegistry::class, function () {
-            return new ModuleRegistry();
+            return new ModuleRegistry;
         });
 
         $this->app->singleton(ViteManifestRepository::class, function ($app) {
@@ -54,8 +52,6 @@ class PackageServiceProvider extends ServiceProvider
      * Boot publishing rules and Blade directives for runtime assets.
      *
      * Why: The runtime must publish its compiled assets and expose helpers in Blade layouts.
-     *
-     * @return void
      */
     public function boot(): void
     {
@@ -67,28 +63,28 @@ class PackageServiceProvider extends ServiceProvider
         Blade::directive('bcUiRuntimeImportMap', function ($expression) {
             $contextExpression = $expression ?: "'admin-inertia'";
 
-            return "<?php echo app(\\".RuntimeBladeRenderer::class."::class)->renderImportMap({$contextExpression}); ?>";
+            return '<?php echo app(\\'.RuntimeBladeRenderer::class."::class)->renderImportMap({$contextExpression}); ?>";
         });
 
         // Blade directive for emitting the module list used by the runtime loader.
         Blade::directive('bcUiRuntimeModuleList', function ($expression) {
             $contextExpression = $expression ?: "'admin-inertia'";
 
-            return "<?php echo app(\\".RuntimeBladeRenderer::class."::class)->renderModuleListScript({$contextExpression}); ?>";
+            return '<?php echo app(\\'.RuntimeBladeRenderer::class."::class)->renderModuleListScript({$contextExpression}); ?>";
         });
 
         // Blade directive for emitting any CSS assets linked to the runtime/module entries.
         Blade::directive('bcUiRuntimeStyles', function ($expression) {
             $contextExpression = $expression ?: "'admin-inertia'";
 
-            return "<?php echo app(\\".RuntimeBladeRenderer::class."::class)->renderStyleLinks({$contextExpression}); ?>";
+            return '<?php echo app(\\'.RuntimeBladeRenderer::class."::class)->renderStyleLinks({$contextExpression}); ?>";
         });
 
         // Blade directive for emitting legacy script tags (UMD bundles).
         Blade::directive('bcUiRuntimeLegacyScripts', function ($expression) {
             $contextExpression = $expression ?: "'admin-inertia'";
 
-            return "<?php echo app(\\".RuntimeBladeRenderer::class."::class)->renderLegacyScripts({$contextExpression}); ?>";
+            return '<?php echo app(\\'.RuntimeBladeRenderer::class."::class)->renderLegacyScripts({$contextExpression}); ?>";
         });
 
         if ($this->app->runningInConsole()) {

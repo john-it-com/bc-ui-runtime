@@ -28,9 +28,6 @@ class BuildTailwindContentManifest extends Command
      */
     protected $description = 'Build a Tailwind content manifest for a bc-ui-runtime context.';
 
-    /**
-     * @param Filesystem $files
-     */
     public function __construct(private readonly Filesystem $files)
     {
         parent::__construct();
@@ -38,9 +35,6 @@ class BuildTailwindContentManifest extends Command
 
     /**
      * Execute the command.
-     *
-     * @param ModuleRegistry $registry
-     * @return int
      */
     public function handle(ModuleRegistry $registry): int
     {
@@ -53,12 +47,14 @@ class BuildTailwindContentManifest extends Command
         $encoded = json_encode($manifest, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
         if ($encoded === false) {
             $this->error('Failed to encode Tailwind content manifest.');
+
             return self::FAILURE;
         }
 
         if (is_string($outputPath) && $outputPath !== '') {
             $this->writeOutput($outputPath, $encoded);
             $this->info("Tailwind content manifest written to {$outputPath}.");
+
             return self::SUCCESS;
         }
 
@@ -70,8 +66,7 @@ class BuildTailwindContentManifest extends Command
     /**
      * Build the Tailwind content manifest array.
      *
-     * @param string $context
-     * @param TailwindContentEntry[] $entries
+     * @param  TailwindContentEntry[]  $entries
      * @return array<string, mixed>
      */
     private function buildManifest(string $context, array $entries): array
@@ -106,10 +101,6 @@ class BuildTailwindContentManifest extends Command
      * Resolve a content glob to an absolute path.
      *
      * Why: Tailwind expects full paths when the build runs outside module directories.
-     *
-     * @param string $basePath
-     * @param string $glob
-     * @return string
      */
     private function resolveGlobPath(string $basePath, string $glob): string
     {
@@ -130,9 +121,6 @@ class BuildTailwindContentManifest extends Command
 
     /**
      * Determine whether a path is absolute.
-     *
-     * @param string $path
-     * @return bool
      */
     private function isAbsolutePath(string $path): bool
     {
@@ -145,16 +133,12 @@ class BuildTailwindContentManifest extends Command
 
     /**
      * Write the manifest output to disk.
-     *
-     * @param string $outputPath
-     * @param string $contents
-     * @return void
      */
     private function writeOutput(string $outputPath, string $contents): void
     {
         $directory = dirname($outputPath);
 
-        if (!$this->files->isDirectory($directory)) {
+        if (! $this->files->isDirectory($directory)) {
             $this->files->makeDirectory($directory, 0755, true);
         }
 

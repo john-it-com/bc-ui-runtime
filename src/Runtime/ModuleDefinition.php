@@ -18,29 +18,25 @@ class ModuleDefinition
     private array $entries = [];
 
     /**
-     * @param string $name Module identifier (e.g. bc-contacts).
-     * @param int $priority Registration priority for module-level Vue registration.
-     * @param string|null $publicBasePath Optional override for public asset path.
+     * @param  string  $name  Module identifier (e.g. bc-contacts).
+     * @param  int  $priority  Registration priority for module-level Vue registration.
+     * @param  string|null  $publicBasePath  Optional override for public asset path.
      */
     public function __construct(
         public readonly string $name,
         public readonly int $priority = 0,
         public readonly ?string $publicBasePath = null,
-    ) {
-    }
+    ) {}
 
     /**
      * Add a module entry for a runtime context.
      *
      * Why: Modules can register multiple entrypoints (admin/shop) without overwriting each other,
      *      and the registry preserves registration order.
-     *
-     * @param ModuleEntry $entry
-     * @return void
      */
     public function addEntry(ModuleEntry $entry): void
     {
-        if (!array_key_exists($entry->context, $this->entries)) {
+        if (! array_key_exists($entry->context, $this->entries)) {
             $this->entries[$entry->context] = [];
         }
 
@@ -60,7 +56,6 @@ class ModuleDefinition
     /**
      * Fetch all module entries for a context name.
      *
-     * @param string $context
      * @return ModuleEntry[]
      */
     public function entriesForContext(string $context): array
