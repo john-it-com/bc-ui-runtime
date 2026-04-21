@@ -33,15 +33,10 @@ class ImportMapBuilder
         '@john-it.com/bc-ui-runtime/blade' => 'src/Resources/js/runtime/blade.ts',
     ];
 
-    /**
-     * @param ModuleRegistry $registry
-     * @param ViteManifestRepository $manifestRepository
-     */
     public function __construct(
         private readonly ModuleRegistry $registry,
         private readonly ViteManifestRepository $manifestRepository,
-    ) {
-    }
+    ) {}
 
     /**
      * Build the import map array for a runtime context.
@@ -49,7 +44,6 @@ class ImportMapBuilder
      * Why: Import maps must point to publicly accessible asset URLs, including
      *      Vapor's CloudFront asset domain when ASSET_URL is configured.
      *
-     * @param string $context
      * @return array<string, array<string, string>>
      */
     public function buildImportMap(string $context): array
@@ -83,7 +77,6 @@ class ImportMapBuilder
      * Why: Contexts can include multiple entries, so we de-duplicate specifiers
      *      while preserving registration order.
      *
-     * @param string $context
      * @return string[]
      */
     public function buildModuleList(string $context): array
@@ -110,7 +103,6 @@ class ImportMapBuilder
      *
      * Why: Legacy bundles still need full asset URLs when ASSET_URL is set.
      *
-     * @param string $context
      * @return string[]
      */
     public function buildLegacyScripts(string $context): array
@@ -134,7 +126,6 @@ class ImportMapBuilder
      *
      * Why: CSS links must resolve through the configured asset base URL (CloudFront on Vapor).
      *
-     * @param string $context
      * @return string[]
      */
     public function buildStyles(string $context): array
@@ -179,10 +170,6 @@ class ImportMapBuilder
      * Resolve a manifest entry to a public URL, falling back to a non-hashed path.
      *
      * Why: All module assets must be served from the configured asset base URL.
-     *
-     * @param string $publicBasePath
-     * @param string $manifestKey
-     * @return string|null
      */
     private function resolveEntryFile(string $publicBasePath, string $manifestKey): ?string
     {
@@ -209,9 +196,6 @@ class ImportMapBuilder
      * Determine a fallback filename from a manifest key.
      *
      * Why: Legacy bundles may use output paths (app.js, shop/app.js), while Vite uses source paths.
-     *
-     * @param string $manifestKey
-     * @return string
      */
     private function fallbackFileForKey(string $manifestKey): string
     {
@@ -224,9 +208,6 @@ class ImportMapBuilder
 
     /**
      * Infer the default public base path from a module import specifier.
-     *
-     * @param string $importSpecifier
-     * @return string
      */
     private function defaultPublicPathForModule(string $importSpecifier): string
     {
@@ -244,9 +225,6 @@ class ImportMapBuilder
      * Convert a public path into a fully qualified asset URL.
      *
      * Why: Ensures asset references respect ASSET_URL (CloudFront on Vapor).
-     *
-     * @param string $path
-     * @return string
      */
     private function toAssetUrl(string $path): string
     {

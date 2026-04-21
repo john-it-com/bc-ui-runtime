@@ -20,17 +20,11 @@ class ModuleRegistry
      */
     private array $modules = [];
 
-    /**
-     * @var TailwindContentRegistry
-     */
     private TailwindContentRegistry $tailwindContentRegistry;
 
-    /**
-     * @param TailwindContentRegistry|null $tailwindContentRegistry
-     */
     public function __construct(?TailwindContentRegistry $tailwindContentRegistry = null)
     {
-        $this->tailwindContentRegistry = $tailwindContentRegistry ?? new TailwindContentRegistry();
+        $this->tailwindContentRegistry = $tailwindContentRegistry ?? new TailwindContentRegistry;
     }
 
     /**
@@ -38,9 +32,6 @@ class ModuleRegistry
      *
      * Why: Each module's service provider should contribute its entrypoints here, and the registry
      *      must allow multiple entries per context without overwriting prior registrations.
-     *
-     * @param ModuleDefinition $definition
-     * @return void
      */
     public function registerModule(ModuleDefinition $definition): void
     {
@@ -52,11 +43,7 @@ class ModuleRegistry
      *
      * Why: Each module can contribute its own templates/components without central hardcoding.
      *
-     * @param string $context
-     * @param string $moduleName
-     * @param string $basePath
-     * @param string[] $globs
-     * @return void
+     * @param  string[]  $globs
      */
     public function registerTailwindContent(
         string $context,
@@ -75,15 +62,6 @@ class ModuleRegistry
 
     /**
      * Convenience helper to register a module entry without instantiating objects.
-     *
-     * @param string $name
-     * @param string $context
-     * @param string $manifestKey
-     * @param string $importSpecifier
-     * @param int $priority
-     * @param string|null $publicBasePath
-     * @param bool $legacy
-     * @return void
      */
     public function registerEntry(
         string $name,
@@ -122,7 +100,6 @@ class ModuleRegistry
      *
      * Why: Multiple entries can exist per module/context, so we flatten while preserving order.
      *
-     * @param string $context
      * @return ModuleEntry[]
      */
     public function entriesForContext(string $context): array
@@ -131,7 +108,7 @@ class ModuleRegistry
 
         foreach ($this->modules as $definition) {
             $contextEntries = $definition->entriesForContext($context);
-            if (!empty($contextEntries)) {
+            if (! empty($contextEntries)) {
                 $entries = array_merge($entries, $contextEntries);
             }
         }
@@ -142,7 +119,6 @@ class ModuleRegistry
     /**
      * Get Tailwind content entries matching a runtime context.
      *
-     * @param string $context
      * @return TailwindContentEntry[]
      */
     public function tailwindEntriesForContext(string $context): array
@@ -153,7 +129,6 @@ class ModuleRegistry
     /**
      * Get legacy (UMD) module entries for a runtime context.
      *
-     * @param string $context
      * @return ModuleEntry[]
      */
     public function legacyEntriesForContext(string $context): array

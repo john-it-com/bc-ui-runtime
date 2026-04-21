@@ -13,18 +13,10 @@ use JohnIt\Bc\Runtime\Runtime\ImportMapBuilder;
 
 class RuntimeBladeRenderer
 {
-    /**
-     * @param ImportMapBuilder $importMapBuilder
-     */
-    public function __construct(private readonly ImportMapBuilder $importMapBuilder)
-    {
-    }
+    public function __construct(private readonly ImportMapBuilder $importMapBuilder) {}
 
     /**
      * Render the import map <script> tag for a runtime context.
-     *
-     * @param string $context
-     * @return string
      */
     public function renderImportMap(string $context): string
     {
@@ -40,9 +32,6 @@ class RuntimeBladeRenderer
      * Render a module list script that bc-ui-runtime loaders can read.
      *
      * Why: Emit the module list and keep a legacy alias for older layouts.
-     *
-     * @param string $context
-     * @return string
      */
     public function renderModuleListScript(string $context): string
     {
@@ -56,9 +45,6 @@ class RuntimeBladeRenderer
 
     /**
      * Render CSS <link> tags for all module styles in a context.
-     *
-     * @param string $context
-     * @return string
      */
     public function renderStyleLinks(string $context): string
     {
@@ -70,6 +56,7 @@ class RuntimeBladeRenderer
 
         $links = array_map(function (string $href) {
             $safeHref = htmlspecialchars($href, ENT_QUOTES, 'UTF-8');
+
             return "<link rel=\"stylesheet\" href=\"{$safeHref}\"/>";
         }, $styles);
 
@@ -78,9 +65,6 @@ class RuntimeBladeRenderer
 
     /**
      * Render legacy <script> tags for UMD modules in a context.
-     *
-     * @param string $context
-     * @return string
      */
     public function renderLegacyScripts(string $context): string
     {
@@ -92,6 +76,7 @@ class RuntimeBladeRenderer
 
         $tags = array_map(function (string $src) {
             $safeSrc = htmlspecialchars($src, ENT_QUOTES, 'UTF-8');
+
             return "<script src=\"{$safeSrc}\"></script>";
         }, $scripts);
 
