@@ -1,0 +1,103 @@
+# Purpose: Execute the package-local Pest suite in CI against the supported Laravel and Testbench matrix via direct
+# Pest parallel execution with code coverage enabled.
+# Role: Keeps each module's isolated Testbench-based test harness enforced for pushes and pull requests while
+# generating GitHub-visible coverage summaries, PR comments, and retained coverage artifacts without wrapping test
+# execution through the Testbench package:test command.
+
+name: run-tests
+
+on:
+  push:
+    branches: [develop, master]
+  pull_request:
+    branches: [develop, master]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [ubuntu-latest]
+        php: [8.3]
+        laravel: [11.*]
+        include:
+          - laravel: 11.*
+            testbench: 9.*
+
+    name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick, fileinfo
+          ini-values: pcov.directory=src
+          coverage: pcov
+
+      - name: Setup problem matchers
+        run: |
+          echo "::add-matcher::${{ runner.tool_cache }}/php.json"
+          echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
+
+      - name: Install dependencies
+        run: |
+          composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
+          composer update --prefer-stable --prefer-dist --no-interaction
+        env:
+          COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}
+
+      - name: List Installed Dependencies
+        run: composer show -D
+
+      - name: Publish config files
+        run: vendor/bin/testbench vendor:publish --tag=config
+
+      - name: Execute tests
+        run: composer run test:parallel:coverage
+
+      - name: Build coverage summary
+        if: always() && hashFiles('build/logs/cobertura.xml') != ''
+        uses: irongut/CodeCoverageSummary@v1.3.0
+        with:
+          filename: build/logs/cobertura.xml
+          badge: true
+          format: markdown
+          output: both
+
+      - name: Add coverage summary to GitHub job summary
+        if: always() && hashFiles('code-coverage-results.md') != ''
+        run: cat code-coverage-results.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Comment coverage summary on pull request
+        if: always() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && hashFiles('code-coverage-results.md') != ''
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: coverage-summary
+          path: code-coverage-results.md
+          skip_unchanged: true
+
+      - name: Upload coverage artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report-php${{ matrix.php }}-laravel11x
+          path: |
+            build/coverage
+            build/coverage.txt
+            build/logs/cobertura.xml
+            build/logs/clover.xml
+            build/report.junit.xml
+            code-coverage-results.md
+          if-no-files-found: warn
+          retention-days: 14

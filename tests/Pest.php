@@ -8,4 +8,23 @@
  */
 
 use JohnIt\Bc\Runtime\Tests\TestCase;
-uses(TestCase::class)->in('.');
+
+/**
+ * Determine which package test directories need the Laravel Testbench harness.
+ *
+ * Why: Architecture tests are static and do not need the application bootstrap, which keeps them isolated from
+ * package-specific runtime fixtures.
+ *
+ * @var list<string> $packageTestDirectories
+ */
+$packageTestDirectories = array_values(array_map(
+    static fn (string $directoryPath): string => basename($directoryPath),
+    array_filter(
+        glob(__DIR__.'/*', GLOB_ONLYDIR) ?: [],
+        static fn (string $directoryPath): bool => basename($directoryPath) !== 'Architecture',
+    ),
+));
+
+if ($packageTestDirectories !== []) {
+    uses(TestCase::class)->in(...$packageTestDirectories);
+}

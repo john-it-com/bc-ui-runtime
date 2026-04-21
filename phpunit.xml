@@ -17,6 +17,8 @@ Role: Defines the test suite, package test environment, first-party source filte
     <php>
         <env name="APP_ENV" value="testing"/>
         <env name="APP_DEBUG" value="true"/>
+        <env name="DB_CONNECTION" value="testing"/>
+        <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="CACHE_DRIVER" value="array"/>
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>

@@ -9,8 +9,10 @@
 
 namespace JohnIt\Bc\Runtime\Tests;
 
+use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
+use JohnIt\Bc\Runtime\PackageServiceProvider;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
 use Symfony\Component\Finder\Finder;
 
@@ -27,7 +29,7 @@ abstract class TestCase extends OrchestraTestCase
     protected function getPackageProviders($app): array
     {
         return [
-            JohnIt\Bc\Runtime\PackageServiceProvider::class,
+            PackageServiceProvider::class,
         ];
     }
 
@@ -55,8 +57,10 @@ abstract class TestCase extends OrchestraTestCase
      */
     protected function loadConfigurationFiles(Application $app): void
     {
+        $configRepository = $app->make(ConfigRepository::class);
+
         foreach ($this->getConfigurationFiles() as $key => $path) {
-            $app['config']->set($key, require $path);
+            $configRepository->set($key, require $path);
         }
     }
 
