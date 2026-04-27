@@ -6,7 +6,6 @@ name: PHPStan
 
 on:
   push:
-    branches: [develop, master]
     paths:
       - '**.php'
       - 'composer.json'
