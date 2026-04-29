@@ -212,7 +212,7 @@ class ImportMapBuilder
     private function defaultPublicPathForModule(string $importSpecifier): string
     {
         $parts = explode('/', $importSpecifier);
-        $moduleName = $parts[0] ?? $importSpecifier;
+        $moduleName = $parts[0];
 
         if (str_starts_with($moduleName, '@') && isset($parts[1])) {
             $moduleName = $parts[1];

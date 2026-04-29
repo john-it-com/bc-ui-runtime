@@ -38,7 +38,11 @@ class BuildTailwindContentManifest extends Command
      */
     public function handle(ModuleRegistry $registry): int
     {
-        $context = (string) $this->argument('context');
+        $context = $this->resolveContextArgument();
+        if ($context === null) {
+            return self::FAILURE;
+        }
+
         $outputPath = $this->option('output');
 
         $entries = $registry->tailwindEntriesForContext($context);
@@ -61,6 +65,31 @@ class BuildTailwindContentManifest extends Command
         $this->line($encoded);
 
         return self::SUCCESS;
+    }
+
+    /**
+     * Resolve the required Tailwind context argument as a non-empty string.
+     *
+     * Why: Symfony console input APIs expose broader scalar unions than this command accepts.
+     */
+    private function resolveContextArgument(): ?string
+    {
+        $context = $this->argument('context');
+
+        if (! is_string($context)) {
+            $this->error('The Tailwind content context must be a string.');
+
+            return null;
+        }
+
+        $trimmedContext = trim($context);
+        if ($trimmedContext === '') {
+            $this->error('The Tailwind content context must not be empty.');
+
+            return null;
+        }
+
+        return $trimmedContext;
     }
 
     /**
