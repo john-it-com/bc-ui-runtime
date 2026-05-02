@@ -26,5 +26,5 @@ $packageTestDirectories = array_values(array_map(
 ));
 
 if ($packageTestDirectories !== []) {
-    uses(TestCase::class)->in(...$packageTestDirectories);
+    pest()->extend(TestCase::class)->in(...$packageTestDirectories);
 }
