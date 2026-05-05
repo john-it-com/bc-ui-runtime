@@ -3,6 +3,8 @@
 # Role: Keeps each module's isolated Testbench-based test harness enforced for pushes and pull requests while
 # generating GitHub-visible coverage summaries, PR comments, and retained coverage artifacts without wrapping test
 # execution through the Testbench package:test command.
+# Reliability: Refreshes Ubuntu package metadata before setup-php runs so transient package-index failures are less
+# likely to surface later as misleading Composer platform errors.
 
 name: run-tests
 
@@ -36,8 +38,19 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Refresh APT metadata for PHP extension installation
+        run: |
+          sudo tee /etc/apt/apt.conf.d/80-veasysport-ci-retries >/dev/null <<'EOF'
+          Acquire::Retries "5";
+          Acquire::http::Timeout "30";
+          Acquire::https::Timeout "30";
+          EOF
+          sudo apt-get update
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
+        env:
+          FAIL_FAST: true
         with:
           php-version: ${{ matrix.php }}
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick, fileinfo
