@@ -8,6 +8,8 @@ name: PHPStan
 
 on:
   push:
+    tags-ignore:
+      - "*"
     paths:
       - '**.php'
       - 'composer.json'

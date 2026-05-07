@@ -10,6 +10,8 @@ name: run-tests
 
 on:
   push:
+    tags-ignore:
+      - "*"
   pull_request:
     branches: [develop, master]
 
