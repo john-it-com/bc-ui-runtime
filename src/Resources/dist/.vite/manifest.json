@@ -13,6 +13,10 @@
       "_vue-BEbO0gUy.js"
     ]
   },
+  "_registry-DG78K_Fq.js": {
+    "file": "assets/registry-DG78K_Fq.js",
+    "name": "registry"
+  },
   "_shared-D_1DJagH.js": {
     "file": "assets/shared-D_1DJagH.js",
     "name": "shared",
@@ -35,27 +39,30 @@
     ]
   },
   "src/Resources/js/runtime/blade.ts": {
-    "file": "assets/runtime-blade-Bk7QlvNf.js",
+    "file": "assets/runtime-blade-D5FkZ9Cz.js",
     "name": "runtime-blade",
     "src": "src/Resources/js/runtime/blade.ts",
     "isEntry": true,
     "imports": [
       "_vue-BEbO0gUy.js",
       "_shared-D_1DJagH.js",
-      "src/Resources/js/runtime/index.ts",
+      "_registry-DG78K_Fq.js",
       "_pinia-BKHKIEEX.js",
       "_vue-i18n-CjB2CTGt.js",
       "_inertia-vue3-BZhGtU6h.js"
     ]
   },
   "src/Resources/js/runtime/index.ts": {
-    "file": "assets/runtime-GeW6OFn0.js",
+    "file": "assets/runtime-gDUx6B3a.js",
     "name": "runtime",
     "src": "src/Resources/js/runtime/index.ts",
-    "isEntry": true
+    "isEntry": true,
+    "imports": [
+      "_registry-DG78K_Fq.js"
+    ]
   },
   "src/Resources/js/runtime/inertia.ts": {
-    "file": "assets/runtime-inertia-BH3xhsuO.js",
+    "file": "assets/runtime-inertia-DOMN9ZBG.js",
     "name": "runtime-inertia",
     "src": "src/Resources/js/runtime/inertia.ts",
     "isEntry": true,
@@ -64,7 +71,7 @@
       "_inertia-vue3-BZhGtU6h.js",
       "src/Resources/js/vendor/ziggy.ts",
       "_shared-D_1DJagH.js",
-      "src/Resources/js/runtime/index.ts",
+      "_registry-DG78K_Fq.js",
       "_pinia-BKHKIEEX.js",
       "_vue-i18n-CjB2CTGt.js"
     ]
