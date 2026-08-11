@@ -1,9 +1,18 @@
+# Purpose: fix code style issues automatically
+
 name: Fix PHP code style issues
 
 on:
   push:
-    tags-ignore:
-      - '*'
+    branches:
+      - develop
+      - master
+    paths:
+      - '**.php'
+  pull_request:
+    branches:
+      - develop
+      - master
     paths:
       - '**.php'
 
@@ -15,7 +24,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.ref_name }}
+          ref: ${{ github.head_ref }}
 
       - name: Fix PHP code style issues
         uses: aglipanci/laravel-pint-action@2.3.0
@@ -23,5 +32,4 @@ jobs:
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          branch: ${{ github.ref_name }}
           commit_message: Fix styling

@@ -10,7 +10,7 @@ Role: Defines the test suite, package test environment, first-party source filte
     colors="true"
 >
     <testsuites>
-        <testsuite name="Feature">
+        <testsuite name="Package">
             <directory suffix="Test.php">./tests</directory>
         </testsuite>
     </testsuites>

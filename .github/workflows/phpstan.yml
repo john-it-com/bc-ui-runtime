@@ -1,65 +1,46 @@
 # Purpose: Execute the package-local PHPStan analysis in CI for this module.
-# Role: Keeps static analysis separate from Pest while enforcing the module's package-local PHPStan configuration on
-# pushes and pull requests.
-# Reliability: Refreshes Ubuntu package metadata before setup-php runs so transient package-index failures are less
-# likely to surface later as misleading Composer platform errors.
 
 name: PHPStan
 
 on:
   push:
-    tags-ignore:
-      - "*"
+    branches:
+      - develop
+      - master
     paths:
-      - '**.php'
-      - 'composer.json'
-      - 'phpstan.neon.dist'
-      - 'phpstan-baseline.neon'
-      - '.github/workflows/phpstan.yml'
+      - "**.php"
+      - "phpstan.neon.dist"
   pull_request:
-    branches: [develop, master]
+    branches:
+      - develop
+      - master
     paths:
-      - '**.php'
-      - 'composer.json'
-      - 'phpstan.neon.dist'
-      - 'phpstan-baseline.neon'
-      - '.github/workflows/phpstan.yml'
+      - "**.php"
+      - "phpstan.neon.dist"
 
 permissions:
   contents: read
 
 jobs:
   phpstan:
-    name: phpstan
+    name: PHPStan
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          submodules: recursive
-
-      - name: Refresh APT metadata for PHP extension installation
-        run: |
-          sudo tee /etc/apt/apt.conf.d/80-veasysport-ci-retries >/dev/null <<'EOF'
-          Acquire::Retries "5";
-          Acquire::http::Timeout "30";
-          Acquire::https::Timeout "30";
-          EOF
-          sudo apt-get update
+        uses: actions/checkout@v7
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
-        env:
-          FAIL_FAST: true
         with:
-          php-version: '8.3'
+          php-version: "8.3"
+          extensions: gd, sqlite
           coverage: none
 
       - name: Install dependencies
-        run: composer update --prefer-stable --prefer-dist --no-interaction
+        run: composer install --prefer-dist --no-interaction --no-progress
         env:
           COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}
 
       - name: Run PHPStan
-        run: composer run analyse -- --error-format=github
+        run: vendor/bin/phpstan analyse --error-format=github
