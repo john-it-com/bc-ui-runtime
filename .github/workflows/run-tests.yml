@@ -49,6 +49,7 @@ jobs:
           php-version: ${{ matrix.php }}
           extensions: gd, sqlite
           coverage: none
+          github-token: ${{ github.token }}
 
       - name: Install dependencies
         run: |
