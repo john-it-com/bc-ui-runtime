@@ -47,8 +47,8 @@
             "@php vendor/bin/testbench package:discover --ansi"
         ],
         "test": "vendor/bin/pest",
-        "test:parallel": "vendor/bin/pest --parallel --processes=4 --no-coverage",
-        "test:parallel:coverage": "vendor/bin/pest --parallel --processes=4 --coverage-text",
+        "test:parallel": "vendor/bin/pest --parallel --no-coverage",
+        "test:parallel:coverage": "vendor/bin/pest --parallel --coverage-text",
         "analyse": "vendor/bin/phpstan analyse"
     },
     "config": {
