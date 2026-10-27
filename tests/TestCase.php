@@ -19,6 +19,15 @@ use Symfony\Component\Finder\Finder;
 abstract class TestCase extends OrchestraTestCase
 {
     /**
+     * Enable automatic Composer package discovery for the package-local Testbench app.
+     *
+     * Why: Installed dependencies must register their production services and migrations, matching other BC harnesses.
+     *
+     * @var bool
+     */
+    protected $enablesPackageDiscoveries = true;
+
+    /**
      * Register the package service provider under Testbench.
      *
      * Why: Package-local tests must boot the module in isolation instead of relying on the host application.
