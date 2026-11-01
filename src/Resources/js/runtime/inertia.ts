@@ -122,12 +122,13 @@ export function bootstrapInertiaApp(): void {
     });
 }
 
-type InertiaSetupArgs = Parameters<Parameters<typeof createInertiaApp>[0]['setup']>[0];
+/** Public App props avoid depending on createInertiaApp's optional setup and SSR overloads. */
+type InertiaAppProps = InstanceType<typeof import('@inertiajs/vue3').App>['$props'];
 
 /**
  * Extra Inertia props surfaced by runtime for legacy payloads and SSR variants.
  */
-type InertiaAppPropsWithLegacy = InertiaSetupArgs['props'] & {
+type InertiaAppPropsWithLegacy = InertiaAppProps & {
     page?: Page;
     props?: Record<string, unknown>;
 };

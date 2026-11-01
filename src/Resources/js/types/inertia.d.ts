@@ -13,6 +13,5 @@ declare module '@inertiajs/core' {
             messages?: Record<string, unknown>;
         };
         ziggy?: Record<string, unknown> & { location?: string | URL };
-        flashNotifications?: unknown;
     }
 }
