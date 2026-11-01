@@ -5,7 +5,7 @@
  * Role: Provides the single, stable runtime entrypoint for all admin Inertia pages and runtime hooks.
  */
 import { createApp, h } from 'vue';
-import { createInertiaApp, router } from '@inertiajs/vue3';
+import { createInertiaApp, router, usePage } from '@inertiajs/vue3';
 import { ZiggyVue } from 'ziggy-js';
 import { exposeGlobals, setupSharedPlugins, updateI18nMessages } from './shared';
 import type { I18nPayload } from './shared';
@@ -112,6 +112,12 @@ export function bootstrapInertiaApp(): void {
             });
 
             vueApp.mount(el);
+
+            const currentPage = usePage();
+            syncCsrfToken(inertiaPageProps.csrfToken);
+            // Refresh only from HTTP responses: same-URL errors can rotate the token, while history props are stale.
+            router.on('success', () => syncCsrfToken(currentPage.props?.csrfToken));
+            router.on('error', () => syncCsrfToken(currentPage.props?.csrfToken));
         },
     });
 }
@@ -178,4 +184,19 @@ interface InertiaNavigateEvent {
     detail?: {
         page?: Page;
     };
+}
+
+/** Refresh the compatibility meta token for native forms/fetch; Inertia keeps its cookie-based XSRF flow. */
+function syncCsrfToken(token: unknown): void {
+    if (typeof token !== 'string' || token === '') {
+        return;
+    }
+
+    let meta = document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]');
+    if (!meta) {
+        meta = document.createElement('meta');
+        meta.name = 'csrf-token';
+        document.head.append(meta);
+    }
+    meta.content = token;
 }
