@@ -71,4 +71,9 @@ jobs:
         run: vendor/bin/testbench vendor:publish --tag=config
 
       - name: Execute tests
-        run: vendor/bin/pest --testsuite=Package --parallel --no-coverage
+        run: >-
+          vendor/bin/pest --testsuite=Package --parallel --no-coverage
+          --display-notices
+          --display-phpunit-notices
+          --do-not-fail-on-notice
+          --do-not-fail-on-phpunit-notice
