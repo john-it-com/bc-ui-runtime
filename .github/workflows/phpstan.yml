@@ -26,7 +26,15 @@ permissions:
 jobs:
   phpstan:
     name: PHPStan
-    runs-on: ubuntu-latest
+    # Keep PHP/Node tooling in Ubuntu containers on the organization's Debian runner.
+    runs-on: [self-hosted, linux, x64, debian-13, docker]
+    container: shivammathur/node:24.04
+    defaults:
+      run:
+        shell: bash
+    env:
+      COMPOSER_ALLOW_SUPERUSER: '1'
+      runner: self-hosted
 
     steps:
       - name: Checkout code

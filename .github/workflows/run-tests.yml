@@ -19,16 +19,23 @@ permissions:
 
 jobs:
   test:
-    runs-on: ${{ matrix.os }}
+    # Keep PHP/Node tooling in Ubuntu containers on the organization's Debian runner.
+    runs-on: [self-hosted, linux, x64, debian-13, docker]
+    container: shivammathur/node:24.04
+    defaults:
+      run:
+        shell: bash
 
     env:
+      COMPOSER_ALLOW_SUPERUSER: '1'
+      runner: self-hosted
       # set the width of the docker containers terminal to prevent truncation of test output.
       COLUMNS: 150
 
     strategy:
       fail-fast: true
       matrix:
-        os: [ubuntu-latest]
+        os: [debian-13]
         php: [8.3]
         laravel: [11.*]
         include:

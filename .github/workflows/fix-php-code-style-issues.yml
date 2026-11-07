@@ -18,7 +18,8 @@ on:
 
 jobs:
   php-code-styling:
-    runs-on: ubuntu-latest
+    # Use the organization's Docker-enabled Debian runner.
+    runs-on: [self-hosted, linux, x64, debian-13, docker]
 
     steps:
       - name: Checkout code
