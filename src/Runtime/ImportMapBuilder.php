@@ -25,12 +25,8 @@ class ImportMapBuilder
         'vue-i18n' => 'src/Resources/js/vendor/vue-i18n.ts',
         '@inertiajs/vue3' => 'src/Resources/js/vendor/inertia-vue3.ts',
         'ziggy-js' => 'src/Resources/js/vendor/ziggy.ts',
-        'bc-ui-runtime' => 'src/Resources/js/runtime/index.ts',
-        'bc-ui-runtime/inertia' => 'src/Resources/js/runtime/inertia.ts',
-        'bc-ui-runtime/blade' => 'src/Resources/js/runtime/blade.ts',
         '@john-it.com/bc-ui-runtime' => 'src/Resources/js/runtime/index.ts',
         '@john-it.com/bc-ui-runtime/inertia' => 'src/Resources/js/runtime/inertia.ts',
-        '@john-it.com/bc-ui-runtime/blade' => 'src/Resources/js/runtime/blade.ts',
     ];
 
     public function __construct(
@@ -52,9 +48,6 @@ class ImportMapBuilder
         $seenSpecifiers = array_fill_keys(array_keys($imports), true);
 
         foreach ($this->registry->entriesForContext($context) as $entry) {
-            if ($entry->legacy) {
-                continue;
-            }
             // Prevent accidental overrides of shared dependencies or earlier registrations.
             if (isset($seenSpecifiers[$entry->importSpecifier])) {
                 continue;
@@ -85,9 +78,6 @@ class ImportMapBuilder
         $seenSpecifiers = [];
 
         foreach ($this->registry->entriesForContext($context) as $entry) {
-            if ($entry->legacy) {
-                continue;
-            }
             if (isset($seenSpecifiers[$entry->importSpecifier])) {
                 continue;
             }
@@ -96,29 +86,6 @@ class ImportMapBuilder
         }
 
         return $modules;
-    }
-
-    /**
-     * Build a list of legacy script URLs for a runtime context.
-     *
-     * Why: Legacy bundles still need full asset URLs when ASSET_URL is set.
-     *
-     * @return string[]
-     */
-    public function buildLegacyScripts(string $context): array
-    {
-        $scripts = [];
-
-        foreach ($this->registry->legacyEntriesForContext($context) as $entry) {
-            $publicBasePath = $entry->publicBasePath ?? $this->defaultPublicPathForModule($entry->importSpecifier);
-            $resolved = $this->resolveEntryFile($publicBasePath, $entry->manifestKey);
-
-            if ($resolved !== null) {
-                $scripts[] = $resolved;
-            }
-        }
-
-        return array_values(array_unique($scripts));
     }
 
     /**
@@ -195,7 +162,7 @@ class ImportMapBuilder
     /**
      * Determine a fallback filename from a manifest key.
      *
-     * Why: Legacy bundles may use output paths (app.js, shop/app.js), while Vite uses source paths.
+     * Why: Unbuilt development entries retain their source filename until a manifest is available.
      */
     private function fallbackFileForKey(string $manifestKey): string
     {

@@ -17,9 +17,6 @@
       "types": "./src/Resources/js/types/inertia.d.ts",
       "import": "./src/Resources/js/runtime/inertia.ts"
     },
-    "./blade": {
-      "import": "./src/Resources/js/runtime/blade.ts"
-    },
     "./build/vite.shared.mjs": "./build/vite.shared.mjs",
     "./build/tailwind.preset.cjs": "./build/tailwind.preset.cjs",
     "./package.json": "./package.json"

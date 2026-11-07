@@ -80,13 +80,6 @@ class PackageServiceProvider extends ServiceProvider
             return '<?php echo app(\\'.RuntimeBladeRenderer::class."::class)->renderStyleLinks({$contextExpression}); ?>";
         });
 
-        // Blade directive for emitting legacy script tags (UMD bundles).
-        Blade::directive('bcUiRuntimeLegacyScripts', function ($expression) {
-            $contextExpression = $expression ?: "'admin-inertia'";
-
-            return '<?php echo app(\\'.RuntimeBladeRenderer::class."::class)->renderLegacyScripts({$contextExpression}); ?>";
-        });
-
         if ($this->app->runningInConsole()) {
             $this->commands([
                 BuildTailwindContentManifest::class,

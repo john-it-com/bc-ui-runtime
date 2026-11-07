@@ -5,16 +5,13 @@
  * Role: Provides the single, stable runtime entrypoint for all admin Inertia pages and runtime hooks.
  */
 import { createApp, h } from 'vue';
-import { createInertiaApp, router, usePage } from '@inertiajs/vue3';
+import { createInertiaApp, router } from '@inertiajs/vue3';
 import { ZiggyVue } from 'ziggy-js';
-import { exposeGlobals, setupSharedPlugins, updateI18nMessages } from './shared';
+import { setupSharedPlugins, updateI18nMessages } from './shared';
 import type { I18nPayload } from './shared';
 import { registerAllModules, resolvePage } from './registry';
 import type { Page } from '@inertiajs/core';
 import type { DefineComponent } from 'vue';
-
-// Ensure Vue/Pinia/I18n/Inertia are shared globals for compatibility with legacy integrations.
-exposeGlobals();
 
 let inertiaStarted = false;
 
@@ -57,49 +54,26 @@ export function bootstrapInertiaApp(): void {
     createInertiaApp({
         resolve: resolvePageComponent,
         setup({ el, App, props, plugin }) {
-            const inertiaProps = props as InertiaAppPropsWithLegacy;
+            const inertiaPage = props.initialPage;
+            const inertiaPageProps = inertiaPage.props;
             const vueApp = createApp({ render: () => h(App, props) });
+            const { i18n } = setupSharedPlugins(vueApp, inertiaPageProps.i18n as I18nPayload);
+            const ziggyFromProps = inertiaPageProps.ziggy as unknown as ZiggyConfigInput | undefined;
 
-            const initialI18n = inertiaProps?.initialPage?.props?.i18n
-                || inertiaProps?.page?.props?.i18n
-                || inertiaProps?.props?.i18n;
-            const { i18n } = setupSharedPlugins(vueApp, initialI18n || {});
-
-            const ziggyFromProps = (inertiaProps?.initialPage?.props?.ziggy
-                || inertiaProps?.page?.props?.ziggy
-                || inertiaProps?.props?.ziggy) as unknown as ZiggyConfigInput | undefined;
-            const ziggyOptions = (() => {
-                if (ziggyFromProps) {
-                    const location = normalizeZiggyLocation(ziggyFromProps.location);
-                    return location
-                        ? { ...ziggyFromProps, location }
-                        : { ...ziggyFromProps };
-                }
-
-                if (typeof window !== 'undefined' && window.Ziggy) {
-                    const location = normalizeZiggyLocation((window.Ziggy as unknown as ZiggyConfigInput).location);
-                    return location
-                        ? { ...(window.Ziggy as unknown as ZiggyConfigInput), location }
-                        : (window.Ziggy as unknown as ZiggyConfigInput);
-                }
-
-                return null;
-            })();
-
-            if (ziggyOptions) {
-                if (typeof window !== 'undefined') {
-                    window.Ziggy = ziggyOptions as unknown as typeof window.Ziggy;
-                }
+            if (ziggyFromProps) {
+                const ziggyOptions = {
+                    ...ziggyFromProps,
+                    location: normalizeZiggyLocation(ziggyFromProps.location),
+                };
+                // Imported route() calls resolve the same configuration as the Vue plugin.
+                window.Ziggy = ziggyOptions;
                 vueApp.use(ZiggyVue, ziggyOptions);
             }
-
-            const inertiaPage = inertiaProps?.initialPage || inertiaProps?.page || null;
-            const inertiaPageProps = (inertiaPage?.props || inertiaProps?.props || {}) as Record<string, unknown>;
 
             // Provide module registers access to Inertia props for runtime-specific initialization.
             registerAllModules(vueApp, {
                 inertia: {
-                    props: inertiaProps as unknown as Record<string, unknown>,
+                    props: props as unknown as Record<string, unknown>,
                     page: inertiaPage,
                     pageProps: inertiaPageProps,
                 },
@@ -112,26 +86,9 @@ export function bootstrapInertiaApp(): void {
             });
 
             vueApp.mount(el);
-
-            const currentPage = usePage();
-            syncCsrfToken(inertiaPageProps.csrfToken);
-            // Refresh only from HTTP responses: same-URL errors can rotate the token, while history props are stale.
-            router.on('success', () => syncCsrfToken(currentPage.props?.csrfToken));
-            router.on('error', () => syncCsrfToken(currentPage.props?.csrfToken));
         },
     });
 }
-
-/** Public App props avoid depending on createInertiaApp's optional setup and SSR overloads. */
-type InertiaAppProps = InstanceType<typeof import('@inertiajs/vue3').App>['$props'];
-
-/**
- * Extra Inertia props surfaced by runtime for legacy payloads and SSR variants.
- */
-type InertiaAppPropsWithLegacy = InertiaAppProps & {
-    page?: Page;
-    props?: Record<string, unknown>;
-};
 
 /**
  * Shape for Ziggy config payloads delivered via Inertia props.
@@ -141,14 +98,14 @@ type ZiggyOptions = NonNullable<Parameters<typeof ZiggyVue['install']>[1]>;
 /**
  * Ziggy config input that may include string/URL location payloads.
  */
-type ZiggyConfigInput = ZiggyOptions & {
+type ZiggyConfigInput = Omit<ZiggyOptions, 'location'> & {
     location?: ZiggyOptions['location'] | string | URL;
 };
 
 /**
  * Normalize Ziggy location values to the config shape expected by ZiggyVue.
  *
- * Why: Inertia/legacy payloads may deliver location as a URL string or URL instance.
+ * Why: Inertia props may deliver location as a URL string or URL instance.
  *
  * @param {ZiggyConfigInput['location']} location
  * @returns {ZiggyOptions['location'] | undefined}
@@ -185,19 +142,4 @@ interface InertiaNavigateEvent {
     detail?: {
         page?: Page;
     };
-}
-
-/** Refresh the compatibility meta token for native forms/fetch; Inertia keeps its cookie-based XSRF flow. */
-function syncCsrfToken(token: unknown): void {
-    if (typeof token !== 'string' || token === '') {
-        return;
-    }
-
-    let meta = document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]');
-    if (!meta) {
-        meta = document.createElement('meta');
-        meta.name = 'csrf-token';
-        document.head.append(meta);
-    }
-    meta.content = token;
 }

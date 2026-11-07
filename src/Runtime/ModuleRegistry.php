@@ -70,7 +70,6 @@ class ModuleRegistry
         string $importSpecifier,
         int $priority = 0,
         ?string $publicBasePath = null,
-        bool $legacy = false,
     ): void {
         $definition = $this->modules[$name] ?? new ModuleDefinition($name, $priority, $publicBasePath);
 
@@ -79,7 +78,6 @@ class ModuleRegistry
             manifestKey: $manifestKey,
             importSpecifier: $importSpecifier,
             publicBasePath: $publicBasePath,
-            legacy: $legacy,
         ));
 
         $this->modules[$name] = $definition;
@@ -124,18 +122,5 @@ class ModuleRegistry
     public function tailwindEntriesForContext(string $context): array
     {
         return $this->tailwindContentRegistry->entriesForContext($context);
-    }
-
-    /**
-     * Get legacy (UMD) module entries for a runtime context.
-     *
-     * @return ModuleEntry[]
-     */
-    public function legacyEntriesForContext(string $context): array
-    {
-        return array_values(array_filter(
-            $this->entriesForContext($context),
-            fn (ModuleEntry $entry) => $entry->legacy === true
-        ));
     }
 }

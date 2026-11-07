@@ -17,7 +17,6 @@ export default createBcViteConfig({
     input: {
         'runtime': 'src/Resources/js/runtime/index.ts',
         'runtime-inertia': 'src/Resources/js/runtime/inertia.ts',
-        'runtime-blade': 'src/Resources/js/runtime/blade.ts',
         'vendor-vue': 'src/Resources/js/vendor/vue.ts',
         'vendor-pinia': 'src/Resources/js/vendor/pinia.ts',
         'vendor-vue-i18n': 'src/Resources/js/vendor/vue-i18n.ts',
@@ -28,7 +27,7 @@ export default createBcViteConfig({
     useDefaultExternals: false,
     externals: [],
     rollupOptions: {
-        // Keep named exports on runtime entries (e.g., bootstrapBladeApp).
+        // Keep named exports on runtime entries (e.g., bootstrapInertiaApp).
         preserveEntrySignatures: 'exports-only',
         output: {
             exports: 'named',

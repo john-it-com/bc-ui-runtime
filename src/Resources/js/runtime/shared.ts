@@ -1,14 +1,12 @@
 /**
  * Shared bootstrapping utilities for bc-ui-runtime.
  *
- * Purpose: Expose singleton dependencies, install shared plugins, and manage i18n updates.
+ * Purpose: Install shared plugins from Inertia props and manage i18n updates.
  * Role: Ensures every module uses a single Vue/Pinia/I18n/Inertia instance.
  */
-import * as Vue from 'vue';
 import * as Pinia from 'pinia';
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
 import * as VueI18n from 'vue-i18n';
-import * as InertiaVue3 from '@inertiajs/vue3';
 import type { App } from 'vue';
 import type { Pinia as PiniaInstance } from 'pinia';
 import type { I18n, LocaleMessageValue } from 'vue-i18n';
@@ -19,69 +17,6 @@ import type { I18n, LocaleMessageValue } from 'vue-i18n';
 export interface I18nPayload {
     locale?: string;
     messages?: Record<string, LocaleMessageValue>;
-}
-
-type LocaleMessages = Record<string, LocaleMessageValue>;
-type LocaleMessageMap = Record<string, LocaleMessages>;
-
-/**
- * Determine whether a message object is keyed by locale codes instead of translation namespaces.
- *
- * Why: bc-ui-tailwind exposes fallback messages as `{ en: {...}, de: {...} }`,
- * while Inertia payloads provide the already-selected locale tree.
- *
- * @param {Record<string, LocaleMessageValue> | undefined} messages
- * @returns {boolean}
- */
-function isLocaleMessageMap(messages: Record<string, LocaleMessageValue> | undefined): messages is LocaleMessageMap {
-    if (!messages) {
-        return false;
-    }
-
-    return Object.keys(messages).some((key) => /^[a-z]{2}(?:[-_][A-Z]{2})?$/.test(key));
-}
-
-/**
- * Resolve fallback messages for the requested locale from either supported message shape.
- *
- * @param {Record<string, LocaleMessageValue> | undefined} messages
- * @param {string} locale
- * @param {string} fallbackLocale
- * @returns {Record<string, LocaleMessageValue> | undefined}
- */
-function resolveMessagesForLocale(
-    messages: Record<string, LocaleMessageValue> | undefined,
-    locale: string,
-    fallbackLocale: string,
-): Record<string, LocaleMessageValue> | undefined {
-    if (!messages) {
-        return undefined;
-    }
-
-    if (!isLocaleMessageMap(messages)) {
-        return messages;
-    }
-
-    const normalizedLocale = locale.replace('_', '-');
-    const normalizedFallbackLocale = fallbackLocale.replace('_', '-');
-
-    return messages[locale]
-        || messages[normalizedLocale]
-        || messages[locale.split(/[-_]/)[0]]
-        || messages[fallbackLocale]
-        || messages[normalizedFallbackLocale]
-        || messages[fallbackLocale.split(/[-_]/)[0]]
-        || messages.en;
-}
-
-/**
- * Expose Vue ecosystem globals for compatibility with legacy integrations.
- */
-export function exposeGlobals(): void {
-    window.Vue = window.Vue || Vue;
-    window.Pinia = window.Pinia || Pinia;
-    window.VueI18n = window.VueI18n || VueI18n;
-    window.InertiaVue3 = window.InertiaVue3 || InertiaVue3;
 }
 
 /**
@@ -99,20 +34,7 @@ export function setupSharedPlugins(app: App, i18nPayload: I18nPayload = {}): { p
     const fallbackLocale = document.documentElement.getAttribute('lang') || 'en';
     const locale = i18nPayload.locale || fallbackLocale;
 
-    const fallbackMessages = (window.BcUiTailwind && (window.BcUiTailwind.messages || window.BcUiTailwind.default?.messages)) as Record<string, LocaleMessageValue> | undefined;
-    const rawMessages = i18nPayload.messages
-        || resolveMessagesForLocale(fallbackMessages, locale, fallbackLocale);
-    const messages: Record<string, Record<string, LocaleMessageValue>> = {};
-
-    if (rawMessages && locale) {
-        messages[locale] = rawMessages;
-    }
-
-    const resolvedFallbackMessages = resolveMessagesForLocale(fallbackMessages, fallbackLocale, 'en');
-
-    if (fallbackLocale && !messages[fallbackLocale] && resolvedFallbackMessages && !i18nPayload.messages) {
-        messages[fallbackLocale] = resolvedFallbackMessages;
-    }
+    const messages = i18nPayload.messages ? { [locale]: i18nPayload.messages } : {};
 
     const i18n = VueI18n.createI18n({
         legacy: false,

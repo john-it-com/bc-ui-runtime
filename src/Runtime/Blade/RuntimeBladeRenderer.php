@@ -31,7 +31,7 @@ class RuntimeBladeRenderer
     /**
      * Render a module list script that bc-ui-runtime loaders can read.
      *
-     * Why: Emit the module list and keep a legacy alias for older layouts.
+     * Why: Both Inertia documents load the same canonical module-list global.
      */
     public function renderModuleListScript(string $context): string
     {
@@ -40,7 +40,7 @@ class RuntimeBladeRenderer
 
         return $encoded === false
             ? ''
-            : "<script>window.BcUiRuntimeModules = {$encoded};window.BcRuntimeModules = window.BcUiRuntimeModules;</script>";
+            : "<script>window.BcUiRuntimeModules = {$encoded};</script>";
     }
 
     /**
@@ -61,25 +61,5 @@ class RuntimeBladeRenderer
         }, $styles);
 
         return implode("\n", $links);
-    }
-
-    /**
-     * Render legacy <script> tags for UMD modules in a context.
-     */
-    public function renderLegacyScripts(string $context): string
-    {
-        $scripts = $this->importMapBuilder->buildLegacyScripts($context);
-
-        if (empty($scripts)) {
-            return '';
-        }
-
-        $tags = array_map(function (string $src) {
-            $safeSrc = htmlspecialchars($src, ENT_QUOTES, 'UTF-8');
-
-            return "<script src=\"{$safeSrc}\"></script>";
-        }, $scripts);
-
-        return implode("\n", $tags);
     }
 }
