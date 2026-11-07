@@ -89,6 +89,45 @@ class ImportMapBuilder
     }
 
     /**
+     * Fingerprint the registered frontend and its manifests independently of the checkout location.
+     *
+     * Missing manifests remain deterministic during local development. Runtime bridges are
+     * included even when no feature explicitly registers them as a module entry.
+     */
+    public function versionForContext(string $context): string
+    {
+        $manifests = [
+            'vendor/john-it-com/bc-ui-runtime' => $this->manifestRepository->manifestFor('vendor/john-it-com/bc-ui-runtime'),
+        ];
+        $entries = [];
+
+        foreach ($this->registry->entriesForContext($context) as $entry) {
+            $base = trim($entry->publicBasePath ?? $this->defaultPublicPathForModule($entry->importSpecifier), '/');
+            $entries[] = [$entry->importSpecifier, $entry->manifestKey, $base];
+            $manifests[$base] = $this->manifestRepository->manifestFor($base);
+        }
+
+        return hash('sha256', json_encode(
+            $this->canonicalize(['context' => $context, 'entries' => $entries, 'manifests' => $manifests]),
+            JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES,
+        ));
+    }
+
+    /** Preserve list order while making manifest object-key order irrelevant to asset versions. */
+    private function canonicalize(mixed $value): mixed
+    {
+        if (! is_array($value)) {
+            return $value;
+        }
+
+        if (! array_is_list($value)) {
+            ksort($value);
+        }
+
+        return array_map($this->canonicalize(...), $value);
+    }
+
+    /**
      * Build a list of CSS URLs for a runtime context.
      *
      * Why: CSS links must resolve through the configured asset base URL (CloudFront on Vapor).
