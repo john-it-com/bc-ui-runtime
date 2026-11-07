@@ -7,11 +7,11 @@
  * Role: Establishes a minimal verification point so future feature tests inherit a working package harness.
  */
 
+use Illuminate\Filesystem\Filesystem;
 use JohnIt\Bc\Runtime\Runtime\Blade\RuntimeBladeRenderer;
 use JohnIt\Bc\Runtime\Runtime\ImportMapBuilder;
 use JohnIt\Bc\Runtime\Runtime\Manifest\ViteManifestRepository;
 use JohnIt\Bc\Runtime\Runtime\ModuleRegistry;
-use Illuminate\Filesystem\Filesystem;
 
 test('the package testbench bootstrap initializes', function (): void {
     expect(app())->not->toBeNull();
@@ -44,8 +44,8 @@ test('the inertia runtime exposes only esm bootstrap entries and its canonical m
 /**
  * Resolve real manifests from an isolated public directory without inheriting published assets.
  *
- * @param array<string, array<string, mixed>> $manifests
- * @param list<array{string, string, string, string}> $entries
+ * @param  array<string, array<string, mixed>>  $manifests
+ * @param  list<array{string, string, string, string}>  $entries
  */
 function runtimeVersionFromManifests(array $manifests, array $entries): string
 {
