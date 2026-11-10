@@ -18,6 +18,17 @@ permissions:
   pull-requests: write
 
 jobs:
+  build-assets:
+    name: Module asset resolution
+    runs-on: [self-hosted, linux, x64, debian-13, docker]
+    container: node:24-bookworm
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install frontend dependencies
+        run: npm ci
+      - name: Test module asset resolution
+        run: npm run test:build
+
   test:
     # Keep PHP/Node tooling in Ubuntu containers on the organization's Debian runner.
     runs-on: [self-hosted, linux, x64, debian-13, docker]

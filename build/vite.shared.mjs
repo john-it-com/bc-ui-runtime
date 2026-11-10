@@ -20,11 +20,14 @@ const DEFAULT_EXTERNALS = [
 
 /**
  * Create a Vite config for a bc module bundle.
+ * Relative asset URLs keep lazy chunks and CSS portable across module publishing destinations.
+ * Consumers with a fixed root or CDN location can explicitly override the base.
  *
  * @param {{
  *  root: string,
  *  input: Record<string, string> | string,
  *  outDir: string,
+ *  base?: string,
  *  externals?: string[],
  *  alias?: Record<string, string>,
  *  useDefaultExternals?: boolean,
@@ -49,6 +52,7 @@ export function createBcViteConfig(options) {
 
     return defineConfig({
         root,
+        base: options.base ?? './',
         publicDir: options.publicDir,
         plugins: [
             vue(),
