@@ -69,7 +69,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: gd, sqlite
+          extensions: gd, sqlite, bcmath
           coverage: none
           github-token: ${{ github.token }}
 
