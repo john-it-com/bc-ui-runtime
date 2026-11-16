@@ -13,6 +13,7 @@ on:
       - develop
       - master
 
+  workflow_dispatch:
 permissions:
   contents: read
   pull-requests: write
@@ -24,6 +25,8 @@ jobs:
     container: node:24-bookworm
     steps:
       - uses: actions/checkout@v4
+      - name: Trust the checked-out workspace
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Install frontend dependencies
         run: npm ci
       - name: Test module asset resolution
@@ -47,7 +50,8 @@ jobs:
       fail-fast: true
       matrix:
         os: [debian-13]
-        php: [8.3]
+        php:
+          - '8.4'
         laravel: [11.*]
         include:
           - laravel: 11.*
@@ -69,6 +73,8 @@ jobs:
           coverage: none
           github-token: ${{ github.token }}
 
+      - name: Trust the checked-out workspace
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Install dependencies
         run: |
           composer require \

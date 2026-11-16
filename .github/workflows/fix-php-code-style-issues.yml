@@ -9,6 +9,7 @@ on:
       - master
     paths:
       - '**.php'
+      - .github/workflows/**
   pull_request:
     branches:
       - develop
@@ -16,6 +17,8 @@ on:
     paths:
       - '**.php'
 
+      - .github/workflows/**
+  workflow_dispatch:
 jobs:
   php-code-styling:
     # Use the organization's Docker-enabled Debian runner.
@@ -27,10 +30,22 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
 
+      - name: Setup PHP 8.4 and Pint
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: pint
+          coverage: none
+          extensions: pdo_sqlite
+      - name: Trust the checked-out workspace
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Fix PHP code style issues
-        uses: aglipanci/laravel-pint-action@2.3.0
-
+        run: pint
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: Fix styling
+    container: shivammathur/node:24.04
+    defaults:
+      run:
+        shell: bash

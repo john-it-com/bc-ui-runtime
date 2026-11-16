@@ -11,6 +11,7 @@ on:
       - "**.php"
       - "phpstan.neon.dist"
       - ".github/workflows/phpstan.yml"
+      - .github/workflows/**
   pull_request:
     branches:
       - develop
@@ -20,6 +21,8 @@ on:
       - "phpstan.neon.dist"
       - ".github/workflows/phpstan.yml"
 
+      - .github/workflows/**
+  workflow_dispatch:
 permissions:
   contents: read
 
@@ -43,11 +46,13 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.3"
+          php-version: '8.4'
           extensions: gd, sqlite
           coverage: none
           github-token: ${{ github.token }}
 
+      - name: Trust the checked-out workspace
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Install dependencies
         run: composer install --prefer-dist --no-interaction --no-progress
         env:
