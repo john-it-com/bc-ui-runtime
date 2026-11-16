@@ -1,55 +1,17 @@
 {
-  "_inertia-vue3-CmOq1XMG.js": {
-    "file": "assets/inertia-vue3-CmOq1XMG.js",
-    "name": "inertia-vue3",
-    "imports": [
-      "_vue-D4h_8ZYK.js"
-    ]
-  },
-  "_pinia-DPMGBoPz.js": {
-    "file": "assets/pinia-DPMGBoPz.js",
-    "name": "pinia",
-    "imports": [
-      "_vue-D4h_8ZYK.js"
-    ]
-  },
   "_registry-DfWlNW9j.js": {
     "file": "assets/registry-DfWlNW9j.js",
     "name": "registry"
   },
-  "_shared-DTcAWbpf.js": {
-    "file": "assets/shared-DTcAWbpf.js",
-    "name": "shared",
-    "imports": [
-      "_vue-D4h_8ZYK.js",
-      "_pinia-DPMGBoPz.js",
-      "_vue-i18n-BueOwasX.js",
-      "_inertia-vue3-CmOq1XMG.js"
-    ]
+  "_runtime-core.esm-bundler-C69i-TON.js": {
+    "file": "assets/runtime-core.esm-bundler-C69i-TON.js",
+    "name": "runtime-core.esm-bundler"
   },
-  "_vue-D4h_8ZYK.js": {
-    "file": "assets/vue-D4h_8ZYK.js",
-    "name": "vue"
-  },
-  "_vue-i18n-BueOwasX.js": {
-    "file": "assets/vue-i18n-BueOwasX.js",
-    "name": "vue-i18n",
+  "_runtime-dom.esm-bundler-Dnz3xugf.js": {
+    "file": "assets/runtime-dom.esm-bundler-Dnz3xugf.js",
+    "name": "runtime-dom.esm-bundler",
     "imports": [
-      "_vue-D4h_8ZYK.js"
-    ]
-  },
-  "src/Resources/js/runtime/blade.ts": {
-    "file": "assets/runtime-blade-BGnIp65j.js",
-    "name": "runtime-blade",
-    "src": "src/Resources/js/runtime/blade.ts",
-    "isEntry": true,
-    "imports": [
-      "_vue-D4h_8ZYK.js",
-      "_shared-DTcAWbpf.js",
-      "_registry-DfWlNW9j.js",
-      "_pinia-DPMGBoPz.js",
-      "_vue-i18n-BueOwasX.js",
-      "_inertia-vue3-CmOq1XMG.js"
+      "_runtime-core.esm-bundler-C69i-TON.js"
     ]
   },
   "src/Resources/js/runtime/index.ts": {
@@ -62,61 +24,60 @@
     ]
   },
   "src/Resources/js/runtime/inertia.ts": {
-    "file": "assets/runtime-inertia-DcTVtxOJ.js",
+    "file": "assets/runtime-inertia-CDcv7Rnm.js",
     "name": "runtime-inertia",
     "src": "src/Resources/js/runtime/inertia.ts",
     "isEntry": true,
     "imports": [
-      "_vue-D4h_8ZYK.js",
-      "_inertia-vue3-CmOq1XMG.js",
+      "_runtime-dom.esm-bundler-Dnz3xugf.js",
+      "src/Resources/js/vendor/inertia-vue3.ts",
       "src/Resources/js/vendor/ziggy.ts",
-      "_shared-DTcAWbpf.js",
+      "src/Resources/js/vendor/pinia.ts",
+      "src/Resources/js/vendor/vue-i18n.ts",
       "_registry-DfWlNW9j.js",
-      "_pinia-DPMGBoPz.js",
-      "_vue-i18n-BueOwasX.js"
+      "_runtime-core.esm-bundler-C69i-TON.js"
     ]
   },
   "src/Resources/js/vendor/inertia-vue3.ts": {
-    "file": "assets/vendor-inertia-DpZu561e.js",
+    "file": "assets/vendor-inertia-Uxjlv9M9.js",
     "name": "vendor-inertia",
     "src": "src/Resources/js/vendor/inertia-vue3.ts",
     "isEntry": true,
     "imports": [
-      "_inertia-vue3-CmOq1XMG.js",
-      "_vue-D4h_8ZYK.js"
+      "_runtime-dom.esm-bundler-Dnz3xugf.js",
+      "_runtime-core.esm-bundler-C69i-TON.js"
     ]
   },
   "src/Resources/js/vendor/pinia.ts": {
-    "file": "assets/vendor-pinia-ClUvOAPU.js",
+    "file": "assets/vendor-pinia-CCrfdYLz.js",
     "name": "vendor-pinia",
     "src": "src/Resources/js/vendor/pinia.ts",
     "isEntry": true,
     "imports": [
-      "_pinia-DPMGBoPz.js",
-      "_vue-D4h_8ZYK.js"
+      "_runtime-core.esm-bundler-C69i-TON.js"
     ]
   },
   "src/Resources/js/vendor/vue-i18n.ts": {
-    "file": "assets/vendor-vue-i18n-CNlg_M7p.js",
+    "file": "assets/vendor-vue-i18n-CrKxVhYf.js",
     "name": "vendor-vue-i18n",
     "src": "src/Resources/js/vendor/vue-i18n.ts",
     "isEntry": true,
     "imports": [
-      "_vue-i18n-BueOwasX.js",
-      "_vue-D4h_8ZYK.js"
+      "_runtime-core.esm-bundler-C69i-TON.js"
     ]
   },
   "src/Resources/js/vendor/vue.ts": {
-    "file": "assets/vendor-vue-DP0CoyTD.js",
+    "file": "assets/vendor-vue-D6q9gxZH.js",
     "name": "vendor-vue",
     "src": "src/Resources/js/vendor/vue.ts",
     "isEntry": true,
     "imports": [
-      "_vue-D4h_8ZYK.js"
+      "_runtime-core.esm-bundler-C69i-TON.js",
+      "_runtime-dom.esm-bundler-Dnz3xugf.js"
     ]
   },
   "src/Resources/js/vendor/ziggy.ts": {
-    "file": "assets/vendor-ziggy-BuyPRpt5.js",
+    "file": "assets/vendor-ziggy-wX8cM6ht.js",
     "name": "vendor-ziggy",
     "src": "src/Resources/js/vendor/ziggy.ts",
     "isEntry": true
