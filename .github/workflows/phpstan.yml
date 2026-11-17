@@ -54,6 +54,8 @@ jobs:
           --prefer-stable --prefer-dist --no-interaction --no-progress
         env:
           COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}
+      - name: Discover development packages
+        run: composer discover
       - name: Record resolved dependencies
         run: |
           mkdir -p build

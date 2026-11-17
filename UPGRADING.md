@@ -15,3 +15,7 @@ Tag 3.0.0 only after developer-owned target-stage checks pass. Tags originate fr
 References: [Laravel 12 upgrade guide](https://laravel.com/framework/docs/12.x/upgrade), [Testbench compatibility](https://packages.tools/getting-started), [Testbench 10.12.0 metadata](https://github.com/orchestral/testbench/blob/v10.12.0/composer.json).
 
 Pushing a matching numeric tag triggers this repository's existing npm publication workflow. Prepare and verify Composer and npm version metadata together before publishing; no npm publication or frontend build was initiated as part of source preparation.
+
+## 3.0.1 production-install correction
+
+Development discovery is explicit (`composer discover`), so package-root Composer installs without development dependencies do not invoke an absent Testbench executable. Backend and production jobs qualify both Laravel 12 resolutions without collecting coverage. Prior 3.0.0 evidence remains historical; publish this correction only after its own checks pass.
