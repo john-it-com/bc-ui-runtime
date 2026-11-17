@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\DB;
 
 /** Connection configuration must take effect before the migration and transaction wrappers run. */
 test('uses native in-memory sqlite with enforced foreign keys', function (): void {
+    DB::connection()->getSchemaBuilder();
+
     expect(DB::connection()->getDriverName())->toBe('sqlite')
         ->and(DB::connection()->getDatabaseName())->toBe(':memory:')
         ->and(DB::connection()->getConfig('foreign_key_constraints'))->toBeTrue()
