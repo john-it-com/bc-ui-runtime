@@ -1,35 +1,12 @@
-# Purpose: Execute the package-local PHPStan analysis in CI for this module.
-
+# Verify this package in isolation on PHP 8.4 against the Laravel 12 floor and latest compatible resolution.
 name: PHPStan
 
 on:
   push:
-    branches:
-      - develop
-      - master
-      - laravel-12-13
-    paths:
-      - '**.php'
-      - phpstan.neon.dist
-      - .github/workflows/phpstan.yml
-      - .github/workflows/**
-      - composer.json
-      - composer.lock
-    tags:
-      - 3.*
-      - v3.*
+    branches: [develop, master, laravel-12-13]
+    tags: ['3.*', 'v3.*']
   pull_request:
-    branches:
-      - develop
-      - master
-      - laravel-12-13
-    paths:
-      - '**.php'
-      - phpstan.neon.dist
-      - .github/workflows/phpstan.yml
-      - .github/workflows/**
-      - composer.json
-      - composer.lock
+    branches: [develop, master, laravel-12-13]
   workflow_dispatch:
 
 permissions:
@@ -37,8 +14,7 @@ permissions:
 
 jobs:
   phpstan:
-    name: PHPStan
-    # Keep PHP/Node tooling in Ubuntu containers on the organization's Debian runner.
+    name: PHPStan / PHP 8.4 / Laravel 12 / ${{ matrix.resolution }}
     runs-on: [self-hosted, linux, x64, debian-13, docker]
     container: shivammathur/node:24.04
     defaults:
@@ -46,26 +22,50 @@ jobs:
         shell: bash
     env:
       COMPOSER_ALLOW_SUPERUSER: '1'
-      runner: self-hosted
-
+      APP_ENV: testing
+      COLUMNS: 150
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - resolution: floor
+            laravel: '12.72.0'
+            testbench: '10.12.0'
+          - resolution: latest
+            laravel: '^12.72'
+            testbench: '^10.12'
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7
-
+        uses: actions/checkout@v4
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
-          extensions: gd, sqlite, bcmath
+          extensions: bcmath, dom, fileinfo, intl, mbstring, pdo_sqlite, sqlite3, xml
           coverage: none
           github-token: ${{ github.token }}
-
       - name: Trust the checked-out workspace
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-interaction --no-progress
+      - name: Resolve package-local dependencies
+        run: >-
+          composer update
+          --with "laravel/framework:${{ matrix.laravel }}"
+          --with "orchestra/testbench:${{ matrix.testbench }}"
+          --prefer-stable --prefer-dist --no-interaction --no-progress
         env:
           COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}
-
-      - name: Run PHPStan
-        run: vendor/bin/phpstan analyse --error-format=github
+      - name: Record resolved dependencies
+        run: |
+          mkdir -p build
+          composer show --locked --format=json > build/dependencies.json
+      - name: PHPStan
+        run: composer analyse -- --error-format=github
+      - name: Retain dependency and quality evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.job }}-${{ matrix.resolution }}-${{ github.sha }}
+          path: |
+            composer.lock
+            build/dependencies.json
+            build/coverage.xml

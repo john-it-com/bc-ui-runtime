@@ -13,3 +13,7 @@ testbench.yaml
 /vendor
 node_modules
 .php-cs-fixer.cache
+
+# Laravel 12 package quality artifacts and local dependency resolutions.
+/build/
+/.phpunit.cache/

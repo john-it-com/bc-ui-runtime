@@ -1,5 +1,4 @@
-# Purpose: Execute the package-local Pest suite in CI against the supported Laravel and Testbench matrix
-# and verify the bc-shop shared-types browser canary against a Workbench app.
+# Purpose: Verify runtime assets and the isolated PHP 8.4 / Laravel 12 backend at floor/latest resolutions.
 
 name: run-tests
 
@@ -51,72 +50,60 @@ jobs:
       - name: Test module asset resolution
         run: npm run test:build
 
+
   test:
-    # Keep PHP/Node tooling in Ubuntu containers on the organization's Debian runner.
+    name: Backend tests / PHP 8.4 / Laravel 12 / ${{ matrix.resolution }}
     runs-on: [self-hosted, linux, x64, debian-13, docker]
     container: shivammathur/node:24.04
     defaults:
       run:
         shell: bash
-
     env:
       COMPOSER_ALLOW_SUPERUSER: '1'
-      runner: self-hosted
-      # set the width of the docker containers terminal to prevent truncation of test output.
+      APP_ENV: testing
       COLUMNS: 150
-
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
-        os: [debian-13]
-        php:
-          - '8.4'
-        laravel: [11.*]
         include:
-          - laravel: 11.*
-            testbench: 9.*
-
-    name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.os }}
-
+          - resolution: floor
+            laravel: '12.72.0'
+            testbench: '10.12.0'
+          - resolution: latest
+            laravel: '^12.72'
+            testbench: '^10.12'
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          submodules: recursive
-
+        uses: actions/checkout@v4
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: ${{ matrix.php }}
-          extensions: gd, sqlite, bcmath
-          coverage: none
+          php-version: '8.4'
+          extensions: bcmath, dom, fileinfo, intl, mbstring, pdo_sqlite, sqlite3, xml
+          coverage: xdebug
           github-token: ${{ github.token }}
-
       - name: Trust the checked-out workspace
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
-      - name: Install dependencies
-        run: |
-          composer require \
-            "laravel/framework:${{ matrix.laravel }}" \
-            "orchestra/testbench:${{ matrix.testbench }}" \
-            --no-interaction \
-            --no-update
-
-          composer update \
-            --prefer-stable \
-            --prefer-dist \
-            --no-interaction \
-            --no-progress
+      - name: Resolve package-local dependencies
+        run: >-
+          composer update
+          --with "laravel/framework:${{ matrix.laravel }}"
+          --with "orchestra/testbench:${{ matrix.testbench }}"
+          --prefer-stable --prefer-dist --no-interaction --no-progress
         env:
           COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}
-
-      - name: Publish config files
-        run: vendor/bin/testbench vendor:publish --tag=config
-
-      - name: Execute tests
-        run: >-
-          vendor/bin/pest --testsuite=Package --parallel --no-coverage
-          --display-notices
-          --display-phpunit-notices
-          --do-not-fail-on-notice
-          --do-not-fail-on-phpunit-notice
+      - name: Record resolved dependencies
+        run: |
+          mkdir -p build
+          composer show --locked --format=json > build/dependencies.json
+      - name: Backend tests
+        run: composer test -- --coverage-clover=build/coverage.xml
+      - name: Retain dependency and quality evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.job }}-${{ matrix.resolution }}-${{ github.sha }}
+          path: |
+            composer.lock
+            build/dependencies.json
+            build/coverage.xml
