@@ -21,6 +21,8 @@ on:
   workflow_dispatch:
 jobs:
   php-code-styling:
+    if: >-
+      ${{ github.ref != 'refs/heads/laravel-12-13' && github.head_ref != 'laravel-12-13' && github.ref_type != 'tag' }}
     # Use the organization's Docker-enabled Debian runner.
     runs-on: [self-hosted, linux, x64, debian-13, docker]
 

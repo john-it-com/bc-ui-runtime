@@ -8,12 +8,17 @@ on:
     branches:
       - develop
       - master
+      - laravel-12-13
+    tags:
+      - 3.*
+      - v3.*
   pull_request:
     branches:
       - develop
       - master
-
+      - laravel-12-13
   workflow_dispatch:
+
 permissions:
   contents: read
   pull-requests: write

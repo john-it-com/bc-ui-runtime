@@ -7,22 +7,31 @@ on:
     branches:
       - develop
       - master
+      - laravel-12-13
     paths:
-      - "**.php"
-      - "phpstan.neon.dist"
-      - ".github/workflows/phpstan.yml"
+      - '**.php'
+      - phpstan.neon.dist
+      - .github/workflows/phpstan.yml
       - .github/workflows/**
+      - composer.json
+      - composer.lock
+    tags:
+      - 3.*
+      - v3.*
   pull_request:
     branches:
       - develop
       - master
+      - laravel-12-13
     paths:
-      - "**.php"
-      - "phpstan.neon.dist"
-      - ".github/workflows/phpstan.yml"
-
+      - '**.php'
+      - phpstan.neon.dist
+      - .github/workflows/phpstan.yml
       - .github/workflows/**
+      - composer.json
+      - composer.lock
   workflow_dispatch:
+
 permissions:
   contents: read
 
