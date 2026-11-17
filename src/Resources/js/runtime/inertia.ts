@@ -7,6 +7,7 @@
 import { createApp, h } from 'vue';
 import { createInertiaApp, router } from '@inertiajs/vue3';
 import { ZiggyVue } from 'ziggy-js';
+import type { Config as ZiggyOptions } from 'ziggy-js';
 import { setupSharedPlugins, updateI18nMessages } from './shared';
 import type { I18nPayload } from './shared';
 import { registerAllModules, resolvePage } from './registry';
@@ -89,11 +90,6 @@ export function bootstrapInertiaApp(): void {
         },
     });
 }
-
-/**
- * Shape for Ziggy config payloads delivered via Inertia props.
- */
-type ZiggyOptions = NonNullable<Parameters<typeof ZiggyVue['install']>[1]>;
 
 /**
  * Ziggy config input that may include string/URL location payloads.
