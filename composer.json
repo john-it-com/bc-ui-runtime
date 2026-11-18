@@ -40,7 +40,7 @@
     "prefer-stable": true,
     "require": {
         "php": "^8.4",
-        "laravel/framework": "^12.72"
+        "laravel/framework": "^13.32"
     },
     "scripts": {
         "test": "vendor/bin/pest",
@@ -66,7 +66,7 @@
     },
     "require-dev": {
         "larastan/larastan": "^3.9.2",
-        "orchestra/testbench": "^10.12",
+        "orchestra/testbench": "^11.3",
         "pestphp/pest": "^4.6.2",
         "pestphp/pest-plugin-laravel": "^4.1.0",
         "phpstan/extension-installer": "^1.1",

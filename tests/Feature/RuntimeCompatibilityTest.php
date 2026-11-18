@@ -6,10 +6,10 @@ use Composer\InstalledVersions;
 use Illuminate\Foundation\Application;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
 
-test('the package boots its own PHP 8.4 Laravel 12 and Testbench 10 dependencies', function (): void {
+test('the package boots its own PHP 8.4 Laravel 13 and Testbench 11 dependencies', function (): void {
     expect(PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION)->toBe('8.4')
-        ->and(Application::VERSION)->toStartWith('12.')
-        ->and(InstalledVersions::getVersion('orchestra/testbench'))->toStartWith('10.')
+        ->and(Application::VERSION)->toStartWith('13.')
+        ->and(InstalledVersions::getVersion('orchestra/testbench'))->toStartWith('11.')
         ->and(app())->toBeInstanceOf(Application::class);
 
     $packagePath = dirname(__DIR__, 2);

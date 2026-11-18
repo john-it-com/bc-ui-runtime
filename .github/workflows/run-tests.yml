@@ -1,4 +1,4 @@
-# Verify the isolated bc-ui-runtime package on PHP 8.4 and Laravel 12.
+# Verify the isolated bc-ui-runtime package on PHP 8.4 and Laravel 13.
 name: run-tests
 
 on:
@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   test:
-    name: Backend tests / PHP 8.4 / Laravel 12 / ${{ matrix.resolution }}
+    name: Backend tests / PHP 8.4 / Laravel 13 / ${{ matrix.resolution }}
     runs-on: [self-hosted, linux, x64, debian-13, docker]
     container: shivammathur/node:24.04
     defaults:
@@ -29,11 +29,11 @@ jobs:
       matrix:
         include:
           - resolution: floor
-            laravel: '12.72.0'
-            testbench: '10.12.0'
+            laravel: '13.32.0'
+            testbench: '11.3.0'
           - resolution: latest
-            laravel: '^12.72'
-            testbench: '^10.12'
+            laravel: '^13.32'
+            testbench: '^11.3'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -78,7 +78,7 @@ jobs:
 
 
   production:
-    name: Production install / PHP 8.4 / Laravel 12 / ${{ matrix.resolution }}
+    name: Production install / PHP 8.4 / Laravel 13 / ${{ matrix.resolution }}
     runs-on: [self-hosted, linux, x64, debian-13, docker]
     container: shivammathur/node:24.04
     defaults:
@@ -92,9 +92,9 @@ jobs:
       matrix:
         include:
           - resolution: floor
-            laravel: '12.72.0'
+            laravel: '13.32.0'
           - resolution: latest
-            laravel: '^12.72'
+            laravel: '^13.32'
     steps:
       - uses: actions/checkout@v4
       - name: Refresh runner package metadata
