@@ -29,10 +29,10 @@ jobs:
       matrix:
         include:
           - resolution: floor
-            laravel: '13.32.0'
+            laravel: '13.40.0'
             testbench: '11.3.0'
           - resolution: latest
-            laravel: '^13.32'
+            laravel: '^13.40'
             testbench: '^11.3'
     steps:
       - name: Checkout code

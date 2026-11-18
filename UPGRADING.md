@@ -1,6 +1,6 @@
 # Laravel 13 minor release
 
-3.1.0 requires PHP 8.4 and Laravel ^13.32. Development uses Testbench ^11.3. This minor intentionally drops Laravel 12 support under the approved project release policy; Laravel 12 consumers must retain ~3.0.0. Existing module registry and frontend APIs are preserved.
+3.1.0 requires PHP 8.4 and Laravel ^13.40. Development uses Testbench ^11.3. This minor intentionally drops Laravel 12 support under the approved project release policy; Laravel 12 consumers must retain ~3.0.0. Existing module registry and frontend APIs are preserved.
 
 # Laravel 12 upgrade notes
 
