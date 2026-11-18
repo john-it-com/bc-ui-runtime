@@ -1,4 +1,4 @@
-# Verify the isolated bc-ui-runtime package on PHP 8.4 and Laravel 13.
+# Verify the isolated bc-ui-runtime package on PHP 8.5 and Laravel 13.
 name: run-tests
 
 on:
@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   test:
-    name: Backend tests / PHP 8.4 / Laravel 13 / ${{ matrix.resolution }}
+    name: Backend tests / PHP 8.5 / Laravel 13 / ${{ matrix.resolution }}
     runs-on: [self-hosted, linux, x64, debian-13, docker]
     container: shivammathur/node:24.04
     defaults:
@@ -43,7 +43,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4'
+          php-version: '8.5'
           extensions: gd, bcmath, dom, fileinfo, intl, mbstring, pdo_sqlite, sqlite3, xml
           coverage: none
           github-token: ${{ github.token }}
@@ -64,6 +64,9 @@ jobs:
       - name: Record resolved dependencies
         run: |
           mkdir -p build
+          composer check-platform-reqs
+          php --version > build/php-version.txt
+          php --modules > build/php-extensions.txt
           composer show --locked --format=json > build/dependencies.json
       - name: Backend tests
         run: composer test -- --no-coverage
@@ -75,10 +78,12 @@ jobs:
           path: |
             composer.lock
             build/dependencies.json
+            build/php-version.txt
+            build/php-extensions.txt
 
 
   production:
-    name: Production install / PHP 8.4 / Laravel 13 / ${{ matrix.resolution }}
+    name: Production install / PHP 8.5 / Laravel 13 / ${{ matrix.resolution }}
     runs-on: [self-hosted, linux, x64, debian-13, docker]
     container: shivammathur/node:24.04
     defaults:
@@ -101,7 +106,7 @@ jobs:
         run: apt-get update -qq
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4'
+          php-version: '8.5'
           extensions: gd, bcmath, dom, fileinfo, intl, mbstring, pdo_sqlite, sqlite3, xml
           coverage: none
           github-token: ${{ github.token }}
@@ -135,12 +140,21 @@ jobs:
           }
           echo "bc-ui-runtime production services boot without Testbench.\n";
           PHP
+      - name: Check actual production runtime requirements
+        run: |
+          mkdir -p build
+          composer check-platform-reqs --no-dev
+          php --version > build/php-version.txt
+          php --modules > build/php-extensions.txt
       - name: Retain production dependency evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: production-${{ matrix.resolution }}-${{ github.sha }}
-          path: composer.lock
+          path: |
+            composer.lock
+            build/php-version.txt
+            build/php-extensions.txt
 
   build-assets:
     name: Module asset resolution

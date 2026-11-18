@@ -1,3 +1,9 @@
+# PHP 8.5 / Laravel 13 minor release — 3.2.0
+
+This release line requires PHP **^8.5** and Laravel **^13.40**, with Composer platform **8.5.0** and Testbench **^11.3** for development. PHP 8.4 is no longer supported or tested. It uses a minor release under the explicitly approved project policy despite the breaking runtime/dependency requirements. Existing PHP 8.4 consumers must retain the published N.1.x line with a minor-bounded constraint; PHP 8.5 consumers must select each dependency's new N.2.x line (or its recorded next available minor).
+
+Package workflows verify the Laravel 13 floor/latest resolutions on PHP 8.5, isolated package autoloading and no-dev production boot. Coverage is disabled. Exact release evidence is recorded in the consuming application's M6 upgrade register; do not infer a passing check from this release-note text. No branch merges to develop or production deployments are part of M6.
+
 # Laravel 13 minor release
 
 3.1.0 requires PHP 8.4 and Laravel ^13.40. Development uses Testbench ^11.3. This minor intentionally drops Laravel 12 support under the approved project release policy; Laravel 12 consumers must retain ~3.0.0. Existing module registry and frontend APIs are preserved.

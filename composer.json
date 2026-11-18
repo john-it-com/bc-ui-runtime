@@ -39,7 +39,7 @@
     "minimum-stability": "stable",
     "prefer-stable": true,
     "require": {
-        "php": "^8.4",
+        "php": "^8.5",
         "laravel/framework": "^13.40"
     },
     "scripts": {
@@ -61,7 +61,7 @@
             }
         },
         "platform": {
-            "php": "8.4.0"
+            "php": "8.5.0"
         }
     },
     "require-dev": {
