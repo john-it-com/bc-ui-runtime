@@ -1,24 +1,161 @@
-# Purpose: Execute the package-local Pest suite in CI against the supported Laravel and Testbench matrix
-# and verify the bc-shop shared-types browser canary against a Workbench app.
-
+# Verify the isolated bc-ui-runtime package on PHP 8.5 and Laravel 13.
 name: run-tests
 
 on:
   push:
-    branches:
-      - develop
-      - master
+    branches: [develop, master, laravel-12-13]
+    tags: ['3.*', 'v3.*']
   pull_request:
-    branches:
-      - develop
-      - master
-
+    branches: [develop, master, laravel-12-13]
   workflow_dispatch:
+
 permissions:
   contents: read
-  pull-requests: write
 
 jobs:
+  test:
+    name: Backend tests / PHP 8.5 / Laravel 13 / ${{ matrix.resolution }}
+    runs-on: [self-hosted, linux, x64, debian-13, docker]
+    container: shivammathur/node:24.04
+    defaults:
+      run:
+        shell: bash
+    env:
+      COMPOSER_ALLOW_SUPERUSER: '1'
+      APP_ENV: testing
+      COLUMNS: 150
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - resolution: floor
+            laravel: '13.40.0'
+            testbench: '11.3.0'
+          - resolution: latest
+            laravel: '^13.40'
+            testbench: '^11.3'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      # Refresh image package indexes so setup-php can resolve GD system dependencies.
+      - name: Refresh runner package metadata
+        run: apt-get update -qq
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: gd, bcmath, dom, fileinfo, intl, mbstring, pdo_sqlite, sqlite3, xml
+          coverage: none
+          github-token: ${{ github.token }}
+      - name: Trust the checked-out workspace
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - name: Resolve package-local dependencies
+        run: >-
+          composer update
+          --with "laravel/framework:${{ matrix.laravel }}"
+          --with "orchestra/testbench:${{ matrix.testbench }}"
+          --prefer-stable --prefer-dist --no-interaction --no-progress
+        env:
+          COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}
+      - name: Discover development packages
+        run: composer discover
+      - name: Publish config files
+        run: vendor/bin/testbench vendor:publish --tag=config --no-interaction
+      - name: Record resolved dependencies
+        run: |
+          mkdir -p build
+          composer check-platform-reqs
+          php --version > build/php-version.txt
+          php --modules > build/php-extensions.txt
+          composer show --locked --format=json > build/dependencies.json
+      - name: Backend tests
+        run: composer test -- --no-coverage
+      - name: Retain dependency and quality evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.job }}-${{ matrix.resolution }}-${{ github.sha }}
+          path: |
+            composer.lock
+            build/dependencies.json
+            build/php-version.txt
+            build/php-extensions.txt
+
+
+  production:
+    name: Production install / PHP 8.5 / Laravel 13 / ${{ matrix.resolution }}
+    runs-on: [self-hosted, linux, x64, debian-13, docker]
+    container: shivammathur/node:24.04
+    defaults:
+      run:
+        shell: bash
+    env:
+      COMPOSER_ALLOW_SUPERUSER: '1'
+      APP_ENV: production
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - resolution: floor
+            laravel: '13.40.0'
+          - resolution: latest
+            laravel: '^13.40'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Refresh runner package metadata
+        run: apt-get update -qq
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: gd, bcmath, dom, fileinfo, intl, mbstring, pdo_sqlite, sqlite3, xml
+          coverage: none
+          github-token: ${{ github.token }}
+      - name: Trust the checked-out workspace
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - name: Resolve production dependencies without development tooling
+        run: >-
+          composer update --no-dev
+          --with "laravel/framework:${{ matrix.laravel }}"
+          --prefer-stable --prefer-dist --no-interaction --no-progress
+        env:
+          COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}
+      - name: Boot bc-ui-runtime services without Testbench
+        run: |
+          mkdir -p bootstrap/cache storage/framework/views storage/logs
+          php <<'PHP'
+          <?php
+          require 'vendor/autoload.php';
+
+          if (class_exists(Orchestra\Testbench\TestCase::class)) {
+              throw new RuntimeException('Testbench must not be installed in production.');
+          }
+
+          $app = Illuminate\Foundation\Application::configure(basePath: getcwd())
+              ->withProviders([JohnIt\Bc\Runtime\PackageServiceProvider::class])
+              ->create();
+          $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+
+          if ($app->getProvider(JohnIt\Bc\Runtime\PackageServiceProvider::class) === null) {
+              throw new RuntimeException('The bc-ui-runtime provider did not boot.');
+          }
+          echo "bc-ui-runtime production services boot without Testbench.\n";
+          PHP
+      - name: Check actual production runtime requirements
+        run: |
+          mkdir -p build
+          composer check-platform-reqs --no-dev
+          php --version > build/php-version.txt
+          php --modules > build/php-extensions.txt
+      - name: Retain production dependency evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-${{ matrix.resolution }}-${{ github.sha }}
+          path: |
+            composer.lock
+            build/php-version.txt
+            build/php-extensions.txt
+
   build-assets:
     name: Module asset resolution
     runs-on: [self-hosted, linux, x64, debian-13, docker]
@@ -45,73 +182,3 @@ jobs:
         run: npm run build
       - name: Test module asset resolution
         run: npm run test:build
-
-  test:
-    # Keep PHP/Node tooling in Ubuntu containers on the organization's Debian runner.
-    runs-on: [self-hosted, linux, x64, debian-13, docker]
-    container: shivammathur/node:24.04
-    defaults:
-      run:
-        shell: bash
-
-    env:
-      COMPOSER_ALLOW_SUPERUSER: '1'
-      runner: self-hosted
-      # set the width of the docker containers terminal to prevent truncation of test output.
-      COLUMNS: 150
-
-    strategy:
-      fail-fast: true
-      matrix:
-        os: [debian-13]
-        php:
-          - '8.4'
-        laravel: [11.*]
-        include:
-          - laravel: 11.*
-            testbench: 9.*
-
-    name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.os }}
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          submodules: recursive
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ matrix.php }}
-          extensions: gd, sqlite, bcmath
-          coverage: none
-          github-token: ${{ github.token }}
-
-      - name: Trust the checked-out workspace
-        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
-      - name: Install dependencies
-        run: |
-          composer require \
-            "laravel/framework:${{ matrix.laravel }}" \
-            "orchestra/testbench:${{ matrix.testbench }}" \
-            --no-interaction \
-            --no-update
-
-          composer update \
-            --prefer-stable \
-            --prefer-dist \
-            --no-interaction \
-            --no-progress
-        env:
-          COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}
-
-      - name: Publish config files
-        run: vendor/bin/testbench vendor:publish --tag=config
-
-      - name: Execute tests
-        run: >-
-          vendor/bin/pest --testsuite=Package --parallel --no-coverage
-          --display-notices
-          --display-phpunit-notices
-          --do-not-fail-on-notice
-          --do-not-fail-on-phpunit-notice

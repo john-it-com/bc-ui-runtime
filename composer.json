@@ -39,17 +39,15 @@
     "minimum-stability": "stable",
     "prefer-stable": true,
     "require": {
-        "php": "^8.3",
-        "laravel/framework": "^11.18"
+        "php": "^8.5",
+        "laravel/framework": "^13.40"
     },
     "scripts": {
-        "post-autoload-dump": [
-            "@php vendor/bin/testbench package:discover --ansi"
-        ],
         "test": "vendor/bin/pest",
         "test:parallel": "vendor/bin/pest --parallel --no-coverage",
         "test:parallel:coverage": "vendor/bin/pest --parallel --coverage-text",
-        "analyse": "vendor/bin/phpstan analyse"
+        "analyse": "vendor/bin/phpstan analyse",
+        "discover": "@php vendor/bin/testbench package:discover --ansi"
     },
     "config": {
         "sort-packages": true,
@@ -61,16 +59,42 @@
             "advisories": {
                 "block": false
             }
+        },
+        "platform": {
+            "php": "8.5.0"
         }
     },
     "require-dev": {
         "larastan/larastan": "^3.9.2",
-        "orchestra/testbench": "^9.0.0",
+        "orchestra/testbench": "^11.3",
         "pestphp/pest": "^4.6.2",
         "pestphp/pest-plugin-laravel": "^4.1.0",
         "phpstan/extension-installer": "^1.1",
         "phpstan/phpstan": "^2.1.40",
         "phpstan/phpstan-deprecation-rules": "^2.0",
         "phpstan/phpstan-phpunit": "^2.0"
+    },
+    "conflict": {
+        "symfony/clock": ">=8.0",
+        "symfony/console": ">=8.0",
+        "symfony/css-selector": ">=8.0",
+        "symfony/error-handler": ">=8.0",
+        "symfony/event-dispatcher": ">=8.0",
+        "symfony/finder": ">=8.0",
+        "symfony/http-foundation": ">=8.0",
+        "symfony/http-kernel": ">=8.0",
+        "symfony/mailer": ">=8.0",
+        "symfony/mime": ">=8.0",
+        "symfony/process": ">=8.0",
+        "symfony/routing": ">=8.0",
+        "symfony/string": ">=8.0",
+        "symfony/translation": ">=8.0",
+        "symfony/uid": ">=8.0",
+        "symfony/var-dumper": ">=8.0",
+        "symfony/yaml": ">=8.0",
+        "guzzlehttp/guzzle": ">=8.0",
+        "guzzlehttp/promises": ">=3.0",
+        "guzzlehttp/psr7": ">=3.0",
+        "guzzlehttp/uri-template": ">=2.0"
     }
 }

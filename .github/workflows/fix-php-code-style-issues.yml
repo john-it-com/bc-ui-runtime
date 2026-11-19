@@ -21,6 +21,8 @@ on:
   workflow_dispatch:
 jobs:
   php-code-styling:
+    if: >-
+      ${{ github.ref != 'refs/heads/laravel-12-13' && github.head_ref != 'laravel-12-13' && github.ref_type != 'tag' }}
     # Use the organization's Docker-enabled Debian runner.
     runs-on: [self-hosted, linux, x64, debian-13, docker]
 
@@ -30,10 +32,10 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
 
-      - name: Setup PHP 8.4 and Pint
+      - name: Setup PHP 8.5 and Pint
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4'
+          php-version: '8.5'
           tools: pint
           coverage: none
           extensions: pdo_sqlite

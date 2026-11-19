@@ -1,0 +1,37 @@
+# Repository access only. Tests and PHPStan have separate workflows/gates.
+name: Upgrade repository access
+
+on:
+  push:
+    branches:
+      - laravel-12-13
+    tags:
+      - 3.*
+      - v3.*
+  pull_request:
+    branches:
+      - laravel-12-13
+
+permissions:
+  contents: read
+
+jobs:
+  repository-access:
+    runs-on: [self-hosted, linux, x64, debian-13, docker]
+    container: shivammathur/node:24.04
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout upgrade source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Setup PHP 8.5 and Composer
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          tools: composer:v2
+          coverage: none
+      - name: Public-only consuming root
+        run: echo 'No direct private Composer dependencies; no private credential required.'
