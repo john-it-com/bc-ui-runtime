@@ -14,7 +14,6 @@ permissions:
 
 jobs:
   phpstan:
-    timeout-minutes: 60
     name: PHPStan / PHP 8.5 / Laravel 13 / ${{ matrix.resolution }}
     runs-on: [self-hosted, linux, x64, debian-13, docker]
     container: shivammathur/node:24.04

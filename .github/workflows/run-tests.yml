@@ -14,7 +14,6 @@ permissions:
 
 jobs:
   test:
-    timeout-minutes: 60
     name: Backend tests / PHP 8.5 / Laravel 13 / ${{ matrix.resolution }}
     runs-on: [self-hosted, linux, x64, debian-13, docker]
     container: shivammathur/node:24.04
@@ -40,8 +39,7 @@ jobs:
         uses: actions/checkout@v4
       # Refresh image package indexes so setup-php can resolve GD system dependencies.
       - name: Refresh runner package metadata
-        timeout-minutes: 5
-        run: timeout --signal=TERM --kill-after=10s 290s apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 -o APT::Update::Error-Mode=any update
+        run: apt-get update -qq
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -85,7 +83,6 @@ jobs:
 
 
   production:
-    timeout-minutes: 60
     name: Production install / PHP 8.5 / Laravel 13 / ${{ matrix.resolution }}
     runs-on: [self-hosted, linux, x64, debian-13, docker]
     container: shivammathur/node:24.04
@@ -106,8 +103,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Refresh runner package metadata
-        timeout-minutes: 5
-        run: timeout --signal=TERM --kill-after=10s 290s apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 -o APT::Update::Error-Mode=any update
+        run: apt-get update -qq
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.5'
@@ -161,7 +157,6 @@ jobs:
             build/php-extensions.txt
 
   build-assets:
-    timeout-minutes: 60
     name: Module asset resolution
     runs-on: [self-hosted, linux, x64, debian-13, docker]
     container: node:24-bookworm

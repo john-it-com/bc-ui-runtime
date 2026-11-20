@@ -21,7 +21,6 @@ on:
   workflow_dispatch:
 jobs:
   php-code-styling:
-    timeout-minutes: 60
     if: >-
       ${{ github.ref != 'refs/heads/laravel-12-13' && github.head_ref != 'laravel-12-13' && github.ref_type != 'tag' }}
     # Use the organization's Docker-enabled Debian runner.

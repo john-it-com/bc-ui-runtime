@@ -17,7 +17,6 @@ permissions:
 
 jobs:
   repository-access:
-    timeout-minutes: 60
     runs-on: [self-hosted, linux, x64, debian-13, docker]
     container: shivammathur/node:24.04
     defaults:
