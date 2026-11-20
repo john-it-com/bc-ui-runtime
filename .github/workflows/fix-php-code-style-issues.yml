@@ -4,26 +4,17 @@ name: Fix PHP code style issues
 
 on:
   push:
-    branches:
-      - develop
-      - master
+    branches: ['**']
     paths:
       - '**.php'
-      - .github/workflows/**
-  pull_request:
-    branches:
-      - develop
-      - master
-    paths:
-      - '**.php'
-
       - .github/workflows/**
   workflow_dispatch:
+
 jobs:
   php-code-styling:
     timeout-minutes: 60
     if: >-
-      ${{ github.ref != 'refs/heads/laravel-12-13' && github.head_ref != 'laravel-12-13' && github.ref_type != 'tag' }}
+      ${{ github.ref_type != 'tag' }}
     # Use the organization's Docker-enabled Debian runner.
     runs-on: [self-hosted, linux, x64, debian-13, docker]
 

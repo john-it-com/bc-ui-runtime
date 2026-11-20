@@ -3,14 +3,7 @@ name: Upgrade repository access
 
 on:
   push:
-    branches:
-      - laravel-12-13
-    tags:
-      - 3.*
-      - v3.*
-  pull_request:
-    branches:
-      - laravel-12-13
+    branches: ['**']
 
 permissions:
   contents: read

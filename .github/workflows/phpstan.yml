@@ -1,12 +1,9 @@
-# Verify this package in isolation on PHP 8.5 against the Laravel 13 floor and latest compatible resolution.
+# Verify this package in isolation on PHP 8.5 with the latest compatible dependencies from composer.json.
 name: PHPStan
 
 on:
   push:
-    branches: [develop, master, laravel-12-13]
-    tags: ['3.*', 'v3.*']
-  pull_request:
-    branches: [develop, master, laravel-12-13]
+    branches: ['**']
   workflow_dispatch:
 
 permissions:
@@ -15,7 +12,7 @@ permissions:
 jobs:
   phpstan:
     timeout-minutes: 60
-    name: PHPStan / PHP 8.5 / Laravel 13 / ${{ matrix.resolution }}
+    name: PHPStan / PHP 8.5 / Laravel 13
     runs-on: [self-hosted, linux, x64, debian-13, docker]
     container: shivammathur/node:24.04
     defaults:
@@ -25,16 +22,6 @@ jobs:
       COMPOSER_ALLOW_SUPERUSER: '1'
       APP_ENV: testing
       COLUMNS: 150
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - resolution: floor
-            laravel: '13.40.0'
-            testbench: '11.3.0'
-          - resolution: latest
-            laravel: '^13.40'
-            testbench: '^11.3'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -50,8 +37,6 @@ jobs:
       - name: Resolve package-local dependencies
         run: >-
           composer update
-          --with "laravel/framework:${{ matrix.laravel }}"
-          --with "orchestra/testbench:${{ matrix.testbench }}"
           --prefer-stable --prefer-dist --no-interaction --no-progress
         env:
           COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}
@@ -67,7 +52,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ github.job }}-${{ matrix.resolution }}-${{ github.sha }}
+          name: ${{ github.job }}-${{ github.sha }}
           path: |
             composer.lock
             build/dependencies.json

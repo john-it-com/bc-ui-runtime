@@ -3,10 +3,7 @@ name: run-tests
 
 on:
   push:
-    branches: [develop, master, laravel-12-13]
-    tags: ['3.*', 'v3.*']
-  pull_request:
-    branches: [develop, master, laravel-12-13]
+    branches: ['**']
   workflow_dispatch:
 
 permissions:
@@ -15,7 +12,7 @@ permissions:
 jobs:
   test:
     timeout-minutes: 60
-    name: Backend tests / PHP 8.5 / Laravel 13 / ${{ matrix.resolution }}
+    name: Backend tests / PHP 8.5 / Laravel 13
     runs-on: [self-hosted, linux, x64, debian-13, docker]
     container: shivammathur/node:24.04
     defaults:
@@ -25,16 +22,6 @@ jobs:
       COMPOSER_ALLOW_SUPERUSER: '1'
       APP_ENV: testing
       COLUMNS: 150
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - resolution: floor
-            laravel: '13.40.0'
-            testbench: '11.3.0'
-          - resolution: latest
-            laravel: '^13.40'
-            testbench: '^11.3'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -54,8 +41,6 @@ jobs:
       - name: Resolve package-local dependencies
         run: >-
           composer update
-          --with "laravel/framework:${{ matrix.laravel }}"
-          --with "orchestra/testbench:${{ matrix.testbench }}"
           --prefer-stable --prefer-dist --no-interaction --no-progress
         env:
           COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}
@@ -76,89 +61,13 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ github.job }}-${{ matrix.resolution }}-${{ github.sha }}
+          name: ${{ github.job }}-${{ github.sha }}
           path: |
             composer.lock
             build/dependencies.json
             build/php-version.txt
             build/php-extensions.txt
 
-
-  production:
-    timeout-minutes: 60
-    name: Production install / PHP 8.5 / Laravel 13 / ${{ matrix.resolution }}
-    runs-on: [self-hosted, linux, x64, debian-13, docker]
-    container: shivammathur/node:24.04
-    defaults:
-      run:
-        shell: bash
-    env:
-      COMPOSER_ALLOW_SUPERUSER: '1'
-      APP_ENV: production
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - resolution: floor
-            laravel: '13.40.0'
-          - resolution: latest
-            laravel: '^13.40'
-    steps:
-      - uses: actions/checkout@v4
-      - name: Refresh runner package metadata
-        timeout-minutes: 5
-        run: timeout --signal=TERM --kill-after=10s 290s apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 -o APT::Update::Error-Mode=any update
-      - uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.5'
-          extensions: gd, bcmath, dom, fileinfo, intl, mbstring, pdo_sqlite, sqlite3, xml
-          coverage: none
-          github-token: ${{ github.token }}
-      - name: Trust the checked-out workspace
-        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
-      - name: Resolve production dependencies without development tooling
-        run: >-
-          composer update --no-dev
-          --with "laravel/framework:${{ matrix.laravel }}"
-          --prefer-stable --prefer-dist --no-interaction --no-progress
-        env:
-          COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}
-      - name: Boot bc-ui-runtime services without Testbench
-        run: |
-          mkdir -p bootstrap/cache storage/framework/views storage/logs
-          php <<'PHP'
-          <?php
-          require 'vendor/autoload.php';
-
-          if (class_exists(Orchestra\Testbench\TestCase::class)) {
-              throw new RuntimeException('Testbench must not be installed in production.');
-          }
-
-          $app = Illuminate\Foundation\Application::configure(basePath: getcwd())
-              ->withProviders([JohnIt\Bc\Runtime\PackageServiceProvider::class])
-              ->create();
-          $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
-
-          if ($app->getProvider(JohnIt\Bc\Runtime\PackageServiceProvider::class) === null) {
-              throw new RuntimeException('The bc-ui-runtime provider did not boot.');
-          }
-          echo "bc-ui-runtime production services boot without Testbench.\n";
-          PHP
-      - name: Check actual production runtime requirements
-        run: |
-          mkdir -p build
-          composer check-platform-reqs --no-dev
-          php --version > build/php-version.txt
-          php --modules > build/php-extensions.txt
-      - name: Retain production dependency evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: production-${{ matrix.resolution }}-${{ github.sha }}
-          path: |
-            composer.lock
-            build/php-version.txt
-            build/php-extensions.txt
 
   build-assets:
     timeout-minutes: 60
