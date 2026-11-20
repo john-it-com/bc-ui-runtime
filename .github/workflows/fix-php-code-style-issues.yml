@@ -10,6 +10,11 @@ on:
       - .github/workflows/**
   workflow_dispatch:
 
+# Replace older runs of this workflow on the same branch or tag.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   php-code-styling:
     timeout-minutes: 60

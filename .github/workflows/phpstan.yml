@@ -9,6 +9,11 @@ on:
 permissions:
   contents: read
 
+# Replace older runs of this workflow on the same branch or tag.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   phpstan:
     timeout-minutes: 60

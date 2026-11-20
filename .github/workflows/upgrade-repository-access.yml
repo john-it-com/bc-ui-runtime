@@ -8,6 +8,11 @@ on:
 permissions:
   contents: read
 
+# Replace older runs of this workflow on the same branch or tag.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   repository-access:
     timeout-minutes: 60
