@@ -1,27 +1,30 @@
 <?php
 
 /**
- * Protect the package's SQLite harness contract and production-owned schema boundaries.
- * Full-text search and MySQL-specific queries remain outside SQLite coverage.
+ * Protect the package's MariaDB harness contract and production-owned schema boundaries.
+ * Exercise native constraints through the real migration graph.
  */
 
-use Illuminate\Database\Schema\Grammars\SQLiteGrammar;
+use Illuminate\Database\Schema\Grammars\MySqlGrammar;
 use Illuminate\Support\Facades\DB;
+use JohnIt\Bc\Runtime\Tests\Support\TestDatabase;
 
 /** Connection configuration must take effect before the migration and transaction wrappers run. */
-test('uses native in-memory sqlite with enforced foreign keys', function (): void {
+test('uses native mariadb with enforced foreign keys', function (): void {
     DB::connection()->getSchemaBuilder();
 
-    expect(DB::connection()->getDriverName())->toBe('sqlite')
-        ->and(DB::connection()->getDatabaseName())->toBe(':memory:')
-        ->and(DB::connection()->getConfig('foreign_key_constraints'))->toBeTrue()
-        ->and((int) DB::scalar('PRAGMA foreign_keys'))->toBe(1)
-        ->and(DB::connection()->getSchemaGrammar()::class)->toBe(SQLiteGrammar::class)
-        ->and(DB::select('PRAGMA foreign_key_check'))->toBe([]);
+    expect(DB::connection()->getDriverName())->toBe('mysql')
+        ->and(DB::connection()->getDatabaseName())->toMatch('/\Abc_ui_runtime_testing(?:_test_[A-Za-z0-9]+)?\z/')
+        ->and((int) DB::scalar('SELECT @@FOREIGN_KEY_CHECKS'))->toBe(1)
+        ->and(DB::connection()->getSchemaGrammar()::class)->toBe(MySqlGrammar::class)
+        ->and(DB::connection()->transactionLevel())->toBe(0);
+
+    TestDatabase::assertSafeConnection(DB::connection()->getConfig());
+    TestDatabase::assertForeignKeyIntegrity();
 });
 
 /** Test fixtures may own generic component or external-source tables, but never replace BC-owned tables. */
-test('does not replace production tables or native sqlite schema operations', function (): void {
+test('does not replace production tables or native schema operations', function (): void {
     $ownedTables = [];
     foreach (app('migrator')->paths() as $migrationPath) {
         foreach (glob($migrationPath.'/*.php') ?: [] as $migrationFile) {

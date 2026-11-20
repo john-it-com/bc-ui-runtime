@@ -11,13 +11,120 @@ namespace JohnIt\Bc\Runtime\Tests;
 
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Filesystem\Filesystem;
+use Illuminate\Foundation\Application as LaravelApplication;
+use Illuminate\Foundation\Testing\DatabaseTruncation;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
 use JohnIt\Bc\Runtime\PackageServiceProvider;
+use JohnIt\Bc\Runtime\Tests\Support\TestDatabase;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
+use Spatie\Permission\PermissionRegistrar;
 use Symfony\Component\Finder\Finder;
 
 abstract class TestCase extends OrchestraTestCase
 {
+    use DatabaseTruncation {
+        truncateDatabaseTables as protected truncateDatabaseTablesWithoutSeedRestore;
+    }
+
+    /** @var array<string, array<string, list<array<string, mixed>>>> Migration-owned reference rows per worker database. */
+    protected static array $migrationSeedData = [];
+
+    /**
+     * Restrict truncation to the guarded package connection, including its native worker database.
+     *
+     * @return list<string>
+     */
+    protected function connectionsToTruncate(): array
+    {
+        return ['testbench'];
+    }
+
+    /** Restore migration-seeded reference data after cleanup without enclosing tests in a transaction. */
+    protected function truncateDatabaseTables(): void
+    {
+        if (config('database.default') !== 'testbench') {
+            throw new \RuntimeException('bc-ui-runtime cleanup requires the testbench connection.');
+        }
+
+        TestDatabase::assertSafeConnection(config('database.connections.testbench'));
+        TestDatabase::assertSafeConnection(DB::connection('testbench')->getConfig());
+        if (class_exists(PermissionRegistrar::class)) {
+            $this->app->make(PermissionRegistrar::class)->forgetCachedPermissions();
+        }
+
+        $this->truncateDatabaseTablesWithoutSeedRestore();
+
+        $connection = DB::connection();
+        $databaseName = $connection->getDatabaseName();
+
+        if (! array_key_exists($databaseName, self::$migrationSeedData)) {
+            self::$migrationSeedData[$databaseName] = [];
+            $migrations = config('database.migrations');
+            $migrationsTable = is_array($migrations) ? ($migrations['table'] ?? 'migrations') : $migrations;
+
+            foreach ($connection->getSchemaBuilder()->getTableListing(schema: $connection->getDatabaseName(), schemaQualified: false) as $table) {
+                if ($table === $connection->getTablePrefix().$migrationsTable) {
+                    continue;
+                }
+
+                $rows = $connection->table($table)->get()->map(static fn (object $row): array => (array) $row)->all();
+                if ($rows !== []) {
+                    self::$migrationSeedData[$databaseName][$table] = $rows;
+                }
+            }
+
+            return;
+        }
+
+        /** Migration-seed restoration belongs to cleanup; test fixtures and requests run with constraints enabled. */
+        $connection->getSchemaBuilder()->withoutForeignKeyConstraints(function () use ($connection, $databaseName): void {
+            foreach (self::$migrationSeedData[$databaseName] as $table => $rows) {
+                foreach (array_chunk($rows, 250) as $chunk) {
+                    $connection->table($table)->insert($chunk);
+                }
+            }
+        });
+    }
+
+    /** Keep runtime files separate from other workers and concurrent test runs. */
+    private static ?string $processStoragePath = null;
+
+    /** Select process-owned storage before configuration and provider registration can resolve file paths. */
+    protected function resolveApplication(): LaravelApplication
+    {
+        $app = parent::resolveApplication();
+        $this->isolateTestStorage($app);
+
+        return $app;
+    }
+
+    /**
+     * Isolate generated facades and compiled views before dependency providers boot.
+     *
+     * Why: Laravel writes real-time facade files directly, so parallel workers must not share that cache.
+     */
+    protected function isolateTestStorage(LaravelApplication $app): void
+    {
+        $filesystem = new Filesystem;
+
+        if (self::$processStoragePath === null) {
+            self::$processStoragePath = sys_get_temp_dir().'/bc-ui-runtime-tests-'.getmypid().'-'.bin2hex(random_bytes(8));
+            $storagePath = self::$processStoragePath;
+
+            register_shutdown_function(static function () use ($storagePath): void {
+                (new Filesystem)->deleteDirectory($storagePath);
+            });
+        }
+
+        foreach (['app/public', 'app/private', 'framework/cache/data', 'framework/views', 'framework/sessions', 'logs'] as $directory) {
+            $filesystem->ensureDirectoryExists(self::$processStoragePath.'/'.$directory, 0700);
+        }
+
+        $app->useStoragePath(self::$processStoragePath);
+    }
+
     /**
      * Enable automatic Composer package discovery for the package-local Testbench app.
      *
@@ -32,7 +139,7 @@ abstract class TestCase extends OrchestraTestCase
      *
      * Why: Package-local tests must boot the module in isolation instead of relying on the host application.
      *
-     * @param  \Illuminate\Foundation\Application  $app
+     * @param  LaravelApplication  $app
      * @return array<int, class-string<ServiceProvider>>
      */
     protected function getPackageProviders($app): array
@@ -45,21 +152,25 @@ abstract class TestCase extends OrchestraTestCase
     /**
      * Define the environment for package-local tests.
      *
-     * Why: Testbench needs an in-memory database and package configuration to boot the module consistently.
+     * Why: Testbench needs a disposable MariaDB database and package configuration to boot the module consistently.
      *
-     * @param  \Illuminate\Foundation\Application  $app
+     * @param  LaravelApplication  $app
      */
     protected function defineEnvironment($app): void
     {
         $app['config']->set('telescope.storage.database.connection', 'testbench');
         $app['config']->set('queue.batching.database', 'testbench');
         $app['config']->set('database.default', 'testbench');
-        $app['config']->set('database.connections.testbench', [
-            'driver' => 'sqlite',
-            'database' => ':memory:',
-            'prefix' => '',
-            'foreign_key_constraints' => true,
-        ]);
+        TestDatabase::assertSafeEnvironment();
+        $connection = require __DIR__.'/Support/database.php';
+        TestDatabase::assertSafeConnection($connection);
+        $app['config']->set('database.connections.testbench', $connection);
+        $app['config']->set('view.compiled', $app->storagePath('framework/views'));
+        $app['config']->set('session.files', $app->storagePath('framework/sessions'));
+        $app['config']->set('cache.stores.file.path', $app->storagePath('framework/cache/data'));
+        $app['config']->set('cache.default', 'array');
+        $app['config']->set('permission.cache.store', 'array');
+        $app['config']->set('session.driver', 'array');
     }
 
     /**

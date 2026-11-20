@@ -43,9 +43,9 @@
         "laravel/framework": "^13.40"
     },
     "scripts": {
-        "test": "vendor/bin/pest",
-        "test:parallel": "vendor/bin/pest --parallel --no-coverage",
-        "test:parallel:coverage": "vendor/bin/pest --parallel --coverage-text",
+        "test": "@php vendor/bin/testbench package:test --parallel --testsuite=Package",
+        "test:parallel": "@php vendor/bin/testbench package:test --parallel --testsuite=Package --no-coverage",
+        "test:parallel:coverage": "@php vendor/bin/testbench package:test --parallel --testsuite=Package --coverage-text",
         "analyse": "vendor/bin/phpstan analyse",
         "discover": "@php vendor/bin/testbench package:discover --ansi"
     },
