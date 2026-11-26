@@ -84,18 +84,6 @@ jobs:
           composer show --locked --format=json > build/dependencies.json
       - name: Backend tests
         run: vendor/bin/testbench package:test --parallel --testsuite=Package --no-coverage
-      - name: Retain dependency and quality evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ github.job }}-${{ github.sha }}
-          path: |
-            composer.lock
-            build/dependencies.json
-            build/php-version.txt
-            build/php-extensions.txt
-
-
   build-assets:
     timeout-minutes: 60
     name: Module asset resolution
